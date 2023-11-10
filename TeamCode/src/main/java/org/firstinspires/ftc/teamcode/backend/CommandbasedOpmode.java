@@ -5,7 +5,7 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.Robot;
 import com.arcrobotics.ftclib.command.Subsystem;
-import com.outoftheboxrobotics.photoncore.PhotonCore;
+// TODO import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -64,7 +64,7 @@ public abstract class CommandbasedOpmode extends OpMode {
     @Override
     public void internalPreInit() {
         super.internalPreInit();
-        PhotonCore.enable();
+        // TODO PhotonCore.enable();
         pad1 = new GamepadWrapper(gamepad1);
         pad2 = new GamepadWrapper(gamepad2);
         allHubs = hardwareMap.getAll(LynxModule.class);
