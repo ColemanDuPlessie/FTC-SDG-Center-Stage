@@ -93,7 +93,8 @@ public class AprilTagEnabledLocalizer implements Localizer {
     }
 
     private Pose2d aprilTagPoseToPose2d(AprilTagPose pose) {
-        return new Pose2d(new Vector2d(pose.x/INCHES_PER_METER, pose.y/INCHES_PER_METER), pose.yaw); // TODO this may need pose.z instead of pose.y
+        return null;
+        // TODO return new Pose2d(new Vector2d(pose.x/INCHES_PER_METER, pose.y/INCHES_PER_METER), pose.yaw); // TODO this may need pose.z instead of pose.y
     }
 
     private Pose2d getAprilTagAbsolutePose(Pose2d robotPose, Pose2d aprilTagPose) {
