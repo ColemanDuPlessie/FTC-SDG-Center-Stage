@@ -51,7 +51,8 @@ public class Teleop extends CommandbasedOpmode {
         robot.init(hardwareMap, true);
     }
 
-    public void setIntakeArmPosition() {
+    private void setIntakeArmPosition() {
+        if (robot.slides.getTargetPosition() > 0.05) {return;}
         if (robot.intake.getCurrentSpeed() == 0) {
             robot.arm.holding();
         } else {
@@ -79,7 +80,7 @@ public class Teleop extends CommandbasedOpmode {
                 .whenReleased(() -> {robot.intake.toggleIntake(); setIntakeArmPosition();});
         gamepad.getGamepadButton(GamepadKeys.Button.X)
                 .whenReleased(() -> robot.arm.toggle());
-        gamepad.getGamepadButton(GamepadKeys.Button.Y)
+        gamepad.getGamepadButton(GamepadKeys.Button.B)
             .whenReleased(() -> {robot.intake.toggleOuttake(); setIntakeArmPosition();});
 
     }
