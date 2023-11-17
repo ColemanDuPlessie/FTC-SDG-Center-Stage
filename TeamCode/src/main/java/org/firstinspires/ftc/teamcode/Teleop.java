@@ -65,9 +65,9 @@ public class Teleop extends CommandbasedOpmode {
                 .whenReleased(() -> robot.arm.deposit());
 
         gamepad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenReleased(() -> robot.intakeSlides.incrementTargetPosition(-0.05)); // TODO closely inspect setpoints
+                .whenReleased(() -> robot.slides.incrementTargetPosition(-0.05)); // TODO closely inspect setpoints
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenReleased(() -> robot.intakeSlides.incrementTargetPosition(0.05));
+                .whenReleased(() -> robot.slides.incrementTargetPosition(0.05));
 
         gamepad.getGamepadButton(GamepadKeys.Button.A)
             .whenReleased(() -> robot.intake.toggleIntake());

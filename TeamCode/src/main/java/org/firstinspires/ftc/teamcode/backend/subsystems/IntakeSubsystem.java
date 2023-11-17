@@ -3,29 +3,22 @@ package org.firstinspires.ftc.teamcode.backend.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.ServoImpl;
-import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.teamcode.AutoToTeleopContainer;
-import org.firstinspires.ftc.teamcode.backend.utilities.PositionControlled;
-import org.firstinspires.ftc.teamcode.backend.utilities.controllers.ArmPIDFController;
-import org.firstinspires.ftc.teamcode.backend.utilities.controllers.PIDController;
 
 @Config
 public class IntakeSubsystem extends SubsystemBase {
 
-    public CRServo servo;
+    public DcMotorImpl motor;
 
     private double currentSpeed = 0.0;
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap) {
-        servo = ahwMap.get(CRServo.class, "IntakeServo");
-        servo.setDirection(DcMotorSimple.Direction.REVERSE);
-        servo.setPower(currentSpeed);
+        motor = ahwMap.get(DcMotorImpl.class, "IntakeMotor");
+        motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        motor.setPower(currentSpeed);
     }
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap, boolean isTeleop) {
@@ -36,7 +29,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void setSpeed(double speed) {
         currentSpeed = Math.min(Math.max(speed, -1.0), 1.0);
-        servo.setPower(currentSpeed);
+        motor.setPower(currentSpeed);
     }
 
     public void intake() {setSpeed(1.0);}

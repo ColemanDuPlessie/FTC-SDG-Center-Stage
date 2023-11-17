@@ -9,32 +9,37 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @Config
 public class ArmSubsystem extends SubsystemBase {
 
-    public ServoImpl servo;
+    public ServoImpl lServo;
+    public ServoImpl rServo;
 
     public static double downPosition = 0.42;
     public static double waitingPosition = 0.60;
     public static double upPosition = 1.00;
 
+    public static double altServoOffsetPosition = 0.00;
 
     private double targetPosition = downPosition;
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap) {
-        servo = ahwMap.get(ServoImpl.class, "IntakeServo");
+        lServo = ahwMap.get(ServoImpl.class, "LeftArmServo");
+        rServo = ahwMap.get(ServoImpl.class, "RightArmServo");
         down();
     }
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap, boolean isTeleop) {
-        servo = ahwMap.get(ServoImpl.class, "ArmServo");
+        lServo = ahwMap.get(ServoImpl.class, "LeftArmServo");
+        rServo = ahwMap.get(ServoImpl.class, "RightArmServo");
         down();
     }
 
     public double getTargetPosition() {return targetPosition;}
 
-    public double getPosition() {return servo.getPosition();}
+    public double getPosition() {return lServo.getPosition();}
 
     public void setTargetPosition(double target) {
         targetPosition = target;
-        servo.setPosition(targetPosition);
+        lServo.setPosition(targetPosition);
+        rServo.setPosition(1.0-targetPosition+altServoOffsetPosition);
     }
 
     public void down() {setTargetPosition(downPosition);}

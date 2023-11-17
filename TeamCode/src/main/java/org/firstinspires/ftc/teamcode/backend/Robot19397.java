@@ -36,8 +36,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.DrivetrainSubsystem;
-import org.firstinspires.ftc.teamcode.backend.subsystems.IntakeSlidesSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.SlidesSubsystem;
 
 /**
  * I should probably write this documentation...
@@ -46,7 +46,7 @@ public class Robot19397 extends Robot {
 
     public final ArmSubsystem arm;
     public final IntakeSubsystem intake;
-    public final IntakeSlidesSubsystem intakeSlides;
+    public final SlidesSubsystem slides;
     public final DrivetrainSubsystem drivetrain;
 
     /* local OpMode members. */
@@ -59,7 +59,7 @@ public class Robot19397 extends Robot {
         this.drivetrain = new DrivetrainSubsystem();
         this.arm = new ArmSubsystem();
         this.intake = new IntakeSubsystem();
-        this.intakeSlides = new IntakeSlidesSubsystem();
+        this.slides = new SlidesSubsystem();
     }
 
     /* Initialize standard Hardware interfaces */
@@ -76,8 +76,8 @@ public class Robot19397 extends Robot {
         CommandScheduler.getInstance().registerSubsystem(this.arm);
         intake.init(timer, hwMap, isTeleop);
         CommandScheduler.getInstance().registerSubsystem(this.intake);
-        intakeSlides.init(timer, hwMap, isTeleop);
-        CommandScheduler.getInstance().registerSubsystem(this.intakeSlides);
+        slides.init(timer, hwMap, isTeleop);
+        CommandScheduler.getInstance().registerSubsystem(this.slides);
     }
 
  }
