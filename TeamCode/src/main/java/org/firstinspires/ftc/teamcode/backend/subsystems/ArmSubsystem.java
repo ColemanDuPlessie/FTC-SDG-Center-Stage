@@ -12,10 +12,10 @@ public class ArmSubsystem extends SubsystemBase {
     public ServoImpl lServo;
     public ServoImpl rServo;
 
-    public static double downPosition = 0.03;
+    public static double downPosition = 0.05;
     public static double downWaitingPosition = 0.07;
-    public static double waitingPosition = 0.30;
-    public static double upPosition = 0.60;
+    public static double waitingPosition = 0.24;
+    public static double upPosition = 0.70;
 
     public static double altServoOffsetPosition = 0.00;
 
@@ -44,14 +44,19 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public void down() {setTargetPosition(downPosition);}
+    public void holding() {setTargetPosition(downWaitingPosition);}
     public void center() {setTargetPosition(waitingPosition);}
     public void deposit() {setTargetPosition(upPosition);}
 
     public void toggle() {
-        if (getTargetPosition() == waitingPosition) {
+        if (getTargetPosition() == downWaitingPosition) {
             down();
-        } else {
+        } else if (getTargetPosition() == downPosition){
+            holding();
+        } else if (getTargetPosition() == upPosition){
             center();
+        } else {
+            deposit();
         }
     }
 

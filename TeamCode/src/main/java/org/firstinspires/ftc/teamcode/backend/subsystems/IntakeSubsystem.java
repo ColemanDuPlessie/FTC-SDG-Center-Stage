@@ -13,6 +13,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public DcMotorImpl motor;
 
+    public static double power = 0.75;
+
     private double currentSpeed = 0.0;
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap) {
@@ -32,17 +34,17 @@ public class IntakeSubsystem extends SubsystemBase {
         motor.setPower(currentSpeed);
     }
 
-    public void intake() {setSpeed(1.0);}
+    public void intake() {setSpeed(power);}
     public void hold() {setSpeed(0.0);}
-    public void outtake() {setSpeed(-1.0);}
+    public void outtake() {setSpeed(-power);}
 
     public void toggleIntake() {
-        if (getCurrentSpeed() == 1.0) {setSpeed(0.0);
-        } else {setSpeed(1.0);}
+        if (getCurrentSpeed() == power) {setSpeed(0.0);
+        } else {setSpeed(power);}
     }
     public void toggleOuttake() {
-        if (getCurrentSpeed() == -1.0) {setSpeed(0.0);
-        } else {setSpeed(-1.0);}
+        if (getCurrentSpeed() == -power) {setSpeed(0.0);
+        } else {setSpeed(-power);}
     }
 
 }

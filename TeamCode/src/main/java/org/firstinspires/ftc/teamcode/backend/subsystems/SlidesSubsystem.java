@@ -18,8 +18,11 @@ public class SlidesSubsystem extends SubsystemBase implements PositionControlled
 
     private PIDController PIDF;
 
-    public static int minPosition = 0;
+    public static int minPosition = -50; // Added to ensure complete retraction
     public static int maxPosition = 3700; // Can theoretically go up to 3825. Lowered for safety
+
+    public static int armRaisePosition = 600;
+    public static int armLowerPosition = 1200;
 
     public static double kP = 0.007; // TODO tune this
     public static double kI = 0.0000;
@@ -42,7 +45,7 @@ public class SlidesSubsystem extends SubsystemBase implements PositionControlled
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap, boolean isTeleop) {
         motor = ahwMap.get(DcMotor.class, "SlidesMotor");
-        motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        motor.setDirection(DcMotorSimple.Direction.REVERSE);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (isTeleop) {
             Integer position = AutoToTeleopContainer.getInstance().getSlidesPosition();

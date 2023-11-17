@@ -32,7 +32,7 @@ public class DriveFromGamepad extends CommandBase {
         if (isFieldCentric) {
             dt.driveFieldCentric(forward, turn, strafe, speed);
         } else {
-            dt.driveSimple(-forward, turn, -strafe, speed);
+            dt.driveSimple(forward, turn, strafe, speed);
         }
     }
 
