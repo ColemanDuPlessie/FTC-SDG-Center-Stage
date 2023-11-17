@@ -19,7 +19,7 @@ public class SlidesSubsystem extends SubsystemBase implements PositionControlled
     private PIDController PIDF;
 
     public static int minPosition = 0;
-    public static int maxPosition = 1800; // TODO set this and rotation direction
+    public static int maxPosition = 3700; // Can theoretically go up to 3825. Lowered for safety
 
     public static double kP = 0.007; // TODO tune this
     public static double kI = 0.0000;
@@ -33,7 +33,7 @@ public class SlidesSubsystem extends SubsystemBase implements PositionControlled
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap) {
         motor = ahwMap.get(DcMotor.class, "SlidesMotor");
-        motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        motor.setDirection(DcMotorSimple.Direction.REVERSE);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         startPosition = motor.getCurrentPosition();
         targetPosition = 0;

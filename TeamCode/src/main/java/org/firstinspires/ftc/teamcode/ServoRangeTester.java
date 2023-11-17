@@ -54,7 +54,7 @@ public class ServoRangeTester extends OpMode {
 
     @Override
     public void init() {
-        testServo = hardwareMap.get(ServoImpl.class, "testServo");
+        testServo = hardwareMap.get(ServoImpl.class, "RightArmServo");
     }
 
     @Override
