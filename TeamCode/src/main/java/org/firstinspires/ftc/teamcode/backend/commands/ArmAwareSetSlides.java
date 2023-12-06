@@ -12,11 +12,10 @@ import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 public class ArmAwareSetSlides extends CommandBase {
 
     public static double changeoverPosition = 0.30;
-    public static long armTravelWaitTime = 250;
+    public static long armTravelWaitTime = 500;
 
     private ElapsedTime timer;
     private double targetPos;
-    private double startPos;
     private long startMillis;
     private SlidesSubsystem slides;
     private ArmSubsystem arm;
