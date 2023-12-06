@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 import kotlin.NotImplementedError;
 
-public class PoleLocalizationPipeline extends OpenCvPipeline {
+public class BackdropLocalizationPipeline extends OpenCvPipeline {
 
     private final Mat CALIB_PARAMS = Mat.zeros(3, 3, CvType.CV_32FC1);
     private final Mat DIST_COEFFS  = Mat.zeros(1, 5, CvType.CV_32FC1);
@@ -57,8 +57,8 @@ public class PoleLocalizationPipeline extends OpenCvPipeline {
 
     private ArrayList<PoleDetection> detections = new ArrayList<PoleDetection>();
 
-    public PoleLocalizationPipeline() {}
-    public PoleLocalizationPipeline(Telemetry t) {}
+    public BackdropLocalizationPipeline() {}
+    public BackdropLocalizationPipeline(Telemetry t) {}
 
     @Override
     public void init(Mat frame) {

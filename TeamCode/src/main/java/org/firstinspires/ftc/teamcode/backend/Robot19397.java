@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.CameraSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.DrivetrainSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.DroneSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.IntakeSubsystem;
@@ -54,6 +55,7 @@ public class Robot19397 extends Robot {
     public final WristSubsystem wrist;
     public final PurplePixelSubsystem purplePixel;
     public final DroneSubsystem drone;
+    public final CameraSubsystem camera;
 
     /* local OpMode members. */
     HardwareMap hwMap;
@@ -69,6 +71,7 @@ public class Robot19397 extends Robot {
         this.wrist = new WristSubsystem();
         this.purplePixel = new PurplePixelSubsystem();
         this.drone = new DroneSubsystem();
+        this.camera = new CameraSubsystem();
     }
 
     /* Initialize standard Hardware interfaces */
@@ -93,6 +96,10 @@ public class Robot19397 extends Robot {
         CommandScheduler.getInstance().registerSubsystem(this.purplePixel);
         drone.init(timer, hwMap, isTeleop);
         CommandScheduler.getInstance().registerSubsystem(this.drone);
+        if (isTeleop) { // TODO
+            camera.init(hwMap, CameraSubsystem.pipelineType.BACKDROP_LOCALIZER);
+            CommandScheduler.getInstance().registerSubsystem(this.camera);
+        }
     }
 
  }
