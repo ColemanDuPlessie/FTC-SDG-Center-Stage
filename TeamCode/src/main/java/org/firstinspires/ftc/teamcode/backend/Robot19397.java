@@ -36,8 +36,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.DrivetrainSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.DroneSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.PurplePixelSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.SlidesSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 
 /**
  * I should probably write this documentation...
@@ -48,6 +51,9 @@ public class Robot19397 extends Robot {
     public final IntakeSubsystem intake;
     public final SlidesSubsystem slides;
     public final DrivetrainSubsystem drivetrain;
+    public final WristSubsystem wrist;
+    public final PurplePixelSubsystem purplePixel;
+    public final DroneSubsystem drone;
 
     /* local OpMode members. */
     HardwareMap hwMap;
@@ -60,6 +66,9 @@ public class Robot19397 extends Robot {
         this.arm = new ArmSubsystem();
         this.intake = new IntakeSubsystem();
         this.slides = new SlidesSubsystem();
+        this.wrist = new WristSubsystem();
+        this.purplePixel = new PurplePixelSubsystem();
+        this.drone = new DroneSubsystem();
     }
 
     /* Initialize standard Hardware interfaces */
@@ -78,6 +87,12 @@ public class Robot19397 extends Robot {
         CommandScheduler.getInstance().registerSubsystem(this.intake);
         slides.init(timer, hwMap, isTeleop);
         CommandScheduler.getInstance().registerSubsystem(this.slides);
+        wrist.init(timer, hwMap, isTeleop);
+        CommandScheduler.getInstance().registerSubsystem(this.wrist);
+        purplePixel.init(timer, hwMap, isTeleop);
+        CommandScheduler.getInstance().registerSubsystem(this.purplePixel);
+        drone.init(timer, hwMap, isTeleop);
+        CommandScheduler.getInstance().registerSubsystem(this.drone);
     }
 
  }

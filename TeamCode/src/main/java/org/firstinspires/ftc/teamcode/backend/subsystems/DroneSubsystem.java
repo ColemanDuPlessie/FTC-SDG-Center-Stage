@@ -1,0 +1,41 @@
+package org.firstinspires.ftc.teamcode.backend.subsystems;
+
+import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.ServoImpl;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+@Config
+public class DroneSubsystem extends SubsystemBase {
+
+    public ServoImpl servo;
+
+    public static double waitingPosition = 0.24; // TODO
+    public static double activePosition = 0.70; // TODO
+
+    private double targetPosition = waitingPosition;
+
+    public void init(ElapsedTime aTimer, HardwareMap ahwMap) {
+        servo = ahwMap.get(ServoImpl.class, "DroneServo");
+        hold();
+    }
+
+    public void init(ElapsedTime aTimer, HardwareMap ahwMap, boolean isTeleop) {
+        servo = ahwMap.get(ServoImpl.class, "DroneServo");
+        hold();
+    }
+
+    public double getTargetPosition() {return targetPosition;}
+
+    public double getPosition() {return servo.getPosition();}
+
+    public void setTargetPosition(double target) {
+        targetPosition = target;
+        servo.setPosition(targetPosition);
+    }
+
+    public void hold() {setTargetPosition(waitingPosition);}
+    public void activate() {setTargetPosition(activePosition);}
+
+}
