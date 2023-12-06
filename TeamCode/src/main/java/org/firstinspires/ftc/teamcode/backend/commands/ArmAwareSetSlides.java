@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.SlidesSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 
 @Config
 public class ArmAwareSetSlides extends CommandBase {
@@ -19,15 +20,18 @@ public class ArmAwareSetSlides extends CommandBase {
     private long startMillis;
     private SlidesSubsystem slides;
     private ArmSubsystem arm;
+    private WristSubsystem wrist;
 
     private boolean waitToLower = false;
     private boolean waitToRaise = false;
 
-    public ArmAwareSetSlides(SlidesSubsystem s, ArmSubsystem a, double targetPos, ElapsedTime timer) {
+    public ArmAwareSetSlides(SlidesSubsystem s, ArmSubsystem a, WristSubsystem w, double targetPos, ElapsedTime timer) {
         slides = s;
         arm = a;
+        wrist = w;
         addRequirements(s);
         addRequirements(a);
+        addRequirements(w);
         this.targetPos = targetPos;
         this.timer = timer;
     }
@@ -38,16 +42,20 @@ public class ArmAwareSetSlides extends CommandBase {
         double startPos = slides.getPosition();
         if (startPos < changeoverPosition && targetPos > changeoverPosition) {
             arm.holding();
+            wrist.holding();
             waitToRaise = true;
             slides.setTargetPosition(targetPos);
         } else if (startPos > changeoverPosition && targetPos < changeoverPosition) {
             arm.holding();
+            wrist.holding();
             waitToLower = true;
         } else if (targetPos < changeoverPosition) {
             arm.holding();
+            wrist.holding();
             slides.setTargetPosition(targetPos);
         } else {
             arm.center();
+            wrist.center();
             slides.setTargetPosition(targetPos);
         }
     }
@@ -60,6 +68,7 @@ public class ArmAwareSetSlides extends CommandBase {
         }
         if (waitToRaise && slides.getPosition() >= changeoverPosition) {
             arm.center();
+            wrist.center();
             waitToRaise = false;
         }
     }
