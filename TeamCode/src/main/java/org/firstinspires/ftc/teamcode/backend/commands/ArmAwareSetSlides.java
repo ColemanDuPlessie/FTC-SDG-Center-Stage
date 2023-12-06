@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 @Config
 public class ArmAwareSetSlides extends CommandBase {
 
-    public static double changeoverPosition = 0.25;
+    public static double changeoverPosition = 0.30;
     public static long armTravelWaitTime = 250;
 
     private ElapsedTime timer;
