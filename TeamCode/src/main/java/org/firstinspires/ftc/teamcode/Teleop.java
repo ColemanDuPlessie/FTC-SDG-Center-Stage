@@ -37,6 +37,8 @@ import org.firstinspires.ftc.teamcode.backend.CommandbasedOpmode;
 import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareIncrementSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareSetSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.DriveFromGamepad;
+import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
+import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
 
 
 /**
@@ -62,6 +64,19 @@ public class Teleop extends CommandbasedOpmode {
         }
     }
 
+    private void toggleArm() {
+        robot.arm.toggle();
+        robot.wrist.toggle();
+    }
+
+    private void xPressed() {
+        if (robot.arm.getPosition() == ArmSubsystem.upPosition) {
+            scheduler.schedule(new DriverAssistedDeposit(robot.arm, robot.wrist, timer));
+        } else {
+            toggleArm();
+        }
+    }
+
     @Override
     public void start() {
         scheduler.setDefaultCommand(robot.drivetrain, new DriveFromGamepad(robot.drivetrain, pad1, SetDrivingStyle.isFieldCentric));
@@ -78,10 +93,13 @@ public class Teleop extends CommandbasedOpmode {
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
                 .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer)));
 
+        gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+                .whenReleased(this::toggleArm);
+
         gamepad.getGamepadButton(GamepadKeys.Button.A)
                 .whenReleased(() -> {robot.intake.toggleIntake(); setIntakeArmPosition();});
         gamepad.getGamepadButton(GamepadKeys.Button.X)
-                .whenReleased(() -> robot.arm.toggle());
+                .whenReleased(this::xPressed);
         gamepad.getGamepadButton(GamepadKeys.Button.B)
             .whenReleased(() -> {robot.intake.toggleOuttake(); setIntakeArmPosition();});
 

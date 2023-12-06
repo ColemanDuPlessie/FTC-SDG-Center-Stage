@@ -12,8 +12,8 @@ public class WristSubsystem extends SubsystemBase {
     public ServoImpl servo;
 
     public static double downPosition = 0.45; // TODO
-    public static double downWaitingPosition = 0.50; // TODO
-    public static double waitingPosition = 0.9; // TODO
+    public static double downWaitingPosition = 0.48; // TODO
+    public static double waitingPosition = 0.95; // TODO
     public static double upPosition = 0.73; // TODO
 
     private double targetPosition = downPosition;
@@ -47,10 +47,8 @@ public class WristSubsystem extends SubsystemBase {
             down();
         } else if (getTargetPosition() == downPosition){
             holding();
-        } else if (getTargetPosition() == upPosition){
-            center();
         } else {
-            deposit();
+            center();
         }
     }
 

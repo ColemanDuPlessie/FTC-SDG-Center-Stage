@@ -13,7 +13,7 @@ public class ArmSubsystem extends SubsystemBase {
     public ServoImpl rServo;
 
     public static double downPosition = 0.05;
-    public static double downWaitingPosition = 0.07;
+    public static double downWaitingPosition = 0.06;
     public static double waitingPosition = 0.50;
     public static double upPosition = 0.70;
 
