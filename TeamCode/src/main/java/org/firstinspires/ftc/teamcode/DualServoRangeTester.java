@@ -36,7 +36,7 @@ import com.qualcomm.robotcore.hardware.ServoImpl;
 
 @TeleOp(name = "Dual Servo Range Tester (Dashboard Enabled)", group = "Tester")
 @Config
-public class DualServoRengeTester extends OpMode {
+public class DualServoRangeTester extends OpMode {
 
     public static double aPos1 = 0.5;
     public static double bPos1 = 0.5;
