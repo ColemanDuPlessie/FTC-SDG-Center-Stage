@@ -96,10 +96,8 @@ public class Robot19397 extends Robot {
         CommandScheduler.getInstance().registerSubsystem(this.purplePixel);
         drone.init(timer, hwMap, isTeleop);
         CommandScheduler.getInstance().registerSubsystem(this.drone);
-        if (isTeleop) { // TODO
-            camera.init(hwMap, CameraSubsystem.pipelineType.BACKDROP_LOCALIZER);
-            CommandScheduler.getInstance().registerSubsystem(this.camera);
-        }
+        camera.init(hwMap, isTeleop);
+        CommandScheduler.getInstance().registerSubsystem(this.camera);
     }
 
  }
