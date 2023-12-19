@@ -29,6 +29,7 @@ import org.firstinspires.ftc.vision.VisionProcessor;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Core;
 import org.opencv.imgproc.Imgproc;
 
 
@@ -40,13 +41,12 @@ public class TeamPropProcessor implements VisionProcessor {
         RIGHT
     }
 
-    private PROP_POSITION currentPos;
-    private double currentConfidence;
+    private final boolean isBlue;
 
-    private Mat grey = new Mat();
-    private final Object detectionsUpdateSync = new Object();
+    private PROP_POSITION currentPos = PROP_POSITION.CENTER;
+    private double currentConfidence = 1.0;
 
-    Mat cameraMatrix;
+    private final double minConfidence = 1.1;
 
     int leftX = 50; // TODO this might be a poor system if I need so many doubles. But do I really need a wrapper class, or is there a better way?
     int leftY = 100;
@@ -66,10 +66,10 @@ public class TeamPropProcessor implements VisionProcessor {
     final Paint noDetectPaint;
     final Paint detectPaint;
 
-    private final Object decimationSync = new Object();
-
-    public TeamPropProcessor()
+    public TeamPropProcessor(boolean isBlue)
     {
+        this.isBlue = isBlue;
+
         noDetectPaint = new Paint();
         noDetectPaint.setARGB(80, 255, 0, 0);
         detectPaint = new Paint();
@@ -100,11 +100,41 @@ public class TeamPropProcessor implements VisionProcessor {
     {
         // Convert to greyscale
         Rect leftCrop = new Rect(leftX, leftY, leftW, leftH);
-        Imgproc.cvtColor(input, grey, Imgproc.COLOR_RGBA2GRAY);
+        Rect centerCrop = new Rect(centerX, centerY, centerW, centerH);
+        Rect rightCrop = new Rect(rightX, rightY, rightW, rightH);
 
-        // TODO actually process it
+        Mat left = new Mat(input, leftCrop); // TODO this may be inefficient?
+        Mat center = new Mat(input, centerCrop);
+        Mat right = new Mat(input, rightCrop);
+
+        double leftDetectionValue = processArea(left);
+        double centerDetectionValue = processArea(center);
+        double rightDetectionValue = processArea(right);
+
+        double maxDetection = Math.max(leftDetectionValue, Math.max(centerDetectionValue, rightDetectionValue));
+        double avgDetection = (leftDetectionValue+centerDetectionValue+rightDetectionValue)/3;
+        double confidence = maxDetection/avgDetection;
+        if (confidence > minConfidence) {
+            currentConfidence = confidence;
+            if (leftDetectionValue == maxDetection) {
+                currentPos = PROP_POSITION.LEFT;
+            } else if (rightDetectionValue == maxDetection) {
+                currentPos = PROP_POSITION.RIGHT;
+            } else {
+                currentPos = PROP_POSITION.CENTER;
+            }
+        }
 
         return input;
+    }
+
+    private double processArea(Mat area) {
+        Scalar avg = Core.mean(area);
+        if (isBlue) {
+            return avg.val[2];
+        } else {
+            return avg.val[0];
+        }
     }
 
     public PROP_POSITION getCurrentPosition() {

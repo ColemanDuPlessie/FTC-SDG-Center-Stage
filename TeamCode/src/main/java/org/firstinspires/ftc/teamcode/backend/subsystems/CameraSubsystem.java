@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.SetDrivingStyle;
 import org.firstinspires.ftc.teamcode.backend.cv.TeamPropProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -23,12 +24,6 @@ public class CameraSubsystem extends SubsystemBase {
     private AprilTagProcessor aprilTag;
     private TeamPropProcessor propProcessor; // TODO this definitely isn't really an int
     private VisionPortal visionPortal;
-
-    public enum PROP_POSITION {
-        LEFT,
-        CENTER,
-        RIGHT
-    }
 
     boolean teleop;
 
@@ -57,7 +52,7 @@ public class CameraSubsystem extends SubsystemBase {
         builder.addProcessor(aprilTag);
 
         if (!isTeleop) {
-            propProcessor = new TeamPropProcessor(); // TODO
+            propProcessor = new TeamPropProcessor(SetDrivingStyle.isBlue); // TODO
             builder.addProcessor(propProcessor);
         }
 
@@ -72,8 +67,12 @@ public class CameraSubsystem extends SubsystemBase {
 
     }
 
-    public PROP_POSITION getPropPosition() {
-        return PROP_POSITION.CENTER; // TODO
+    public TeamPropProcessor.PROP_POSITION getPropPosition() {
+        return propProcessor.getCurrentPosition();
+    }
+
+    public double getPropConfidence() {
+        return propProcessor.getCurrentConfidence();
     }
 
     public Pose2d getBackdropPosition() { // TODO
