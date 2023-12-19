@@ -38,7 +38,9 @@ import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareIncrementSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareSetSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.DriveFromGamepad;
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
+import org.firstinspires.ftc.teamcode.backend.commands.EnableIntakeSafe;
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 
 
 /**
@@ -70,10 +72,26 @@ public class Teleop extends CommandbasedOpmode {
     }
 
     private void xPressed() {
-        if (robot.arm.getPosition() == ArmSubsystem.upPosition) {
+        if (robot.wrist.getTargetPosition() == WristSubsystem.readyPosition) {
             scheduler.schedule(new DriverAssistedDeposit(robot.arm, robot.wrist, timer));
         } else {
             toggleArm();
+        }
+    }
+
+    private void toggleIntake(boolean isReversed) {
+        if (robot.arm.getTargetPosition() == ArmSubsystem.downPosition || robot.arm.getTargetPosition() == ArmSubsystem.downWaitingPosition) {
+            if (robot.intake.getCurrentSpeed() == 0.0) {
+                scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer, isReversed));
+                return;
+            } else {
+                toggleArm();
+            }
+        }
+        if (isReversed) {
+            robot.intake.toggleOuttake();
+        } else {
+            robot.intake.toggleIntake();
         }
     }
 
@@ -97,15 +115,16 @@ public class Teleop extends CommandbasedOpmode {
                 .whenReleased(this::toggleArm);
 
         gamepad.getGamepadButton(GamepadKeys.Button.A)
-                .whenReleased(() -> {robot.intake.toggleIntake(); setIntakeArmPosition();});
+                .whenReleased(() -> toggleIntake(false));
         gamepad.getGamepadButton(GamepadKeys.Button.X)
                 .whenReleased(this::xPressed);
         gamepad.getGamepadButton(GamepadKeys.Button.B)
-            .whenReleased(() -> {robot.intake.toggleOuttake(); setIntakeArmPosition();});
+            .whenReleased(() -> toggleIntake(true));
 
     }
 
     @Override
     public void loop() {
+        telemetry.addData("Arm command", scheduler.requiring(robot.arm));
     }
 }

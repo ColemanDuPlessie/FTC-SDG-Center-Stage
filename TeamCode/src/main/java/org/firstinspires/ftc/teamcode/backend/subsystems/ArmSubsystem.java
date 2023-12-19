@@ -24,13 +24,13 @@ public class ArmSubsystem extends SubsystemBase {
     public void init(ElapsedTime aTimer, HardwareMap ahwMap) {
         lServo = ahwMap.get(ServoImpl.class, "LeftArmServo");
         rServo = ahwMap.get(ServoImpl.class, "RightArmServo");
-        down();
+        holding();
     }
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap, boolean isTeleop) {
         lServo = ahwMap.get(ServoImpl.class, "LeftArmServo");
         rServo = ahwMap.get(ServoImpl.class, "RightArmServo");
-        down();
+        holding();
     }
 
     public double getTargetPosition() {return targetPosition;}

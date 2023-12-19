@@ -21,12 +21,12 @@ public class WristSubsystem extends SubsystemBase {
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap) {
         servo = ahwMap.get(ServoImpl.class, "WristServo");
-        down();
+        holding();
     }
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap, boolean isTeleop) {
         servo = ahwMap.get(ServoImpl.class, "WristServo");
-        down();
+        holding();
     }
 
     public double getTargetPosition() {return targetPosition;}
