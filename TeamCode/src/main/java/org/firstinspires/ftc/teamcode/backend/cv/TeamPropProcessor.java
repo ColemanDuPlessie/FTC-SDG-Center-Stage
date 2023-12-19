@@ -24,6 +24,9 @@ package org.firstinspires.ftc.teamcode.backend.cv;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import com.acmerobotics.dashboard.config.Config;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.opencv.core.Mat;
@@ -32,7 +35,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Core;
 import org.opencv.imgproc.Imgproc;
 
-
+@Config
 public class TeamPropProcessor implements VisionProcessor {
 
     public enum PROP_POSITION {
@@ -41,30 +44,36 @@ public class TeamPropProcessor implements VisionProcessor {
         RIGHT
     }
 
+    Mat YCrCb = new Mat();
+
     private final boolean isBlue;
 
     private PROP_POSITION currentPos = PROP_POSITION.CENTER;
     private double currentConfidence = 1.0;
 
-    private final double minConfidence = 1.1;
+    public static double minControlExcedance = 15;
 
-    int leftX = 50; // TODO this might be a poor system if I need so many doubles. But do I really need a wrapper class, or is there a better way?
-    int leftY = 100;
-    int centerX = 100;
-    int centerY = 80;
-    int rightX = 150;
-    int rightY = 100;
-    int leftW = 20;
-    int leftH = 20;
-    int centerW = 20;
+    int leftX = 30;
+    int leftY = 155;
+    int centerX = 195;
+    int centerY = 158;
+    int controlX = 110;
+    int controlY = 180;
+    int leftW = 30;
+    int leftH = 35;
+    int centerW = 30;
     int centerH = 20;
-    int rightW = 20;
-    int rightH = 20;
+    int controlW = 32;
+    int controlH = 32;
 
     double targetW = 320; // Height calculated based on assumed 3:4 aspect ratio. Other constants scaled as necessary for resolution.
 
     final Paint noDetectPaint;
     final Paint detectPaint;
+
+    Telemetry t = null;
+
+    public TeamPropProcessor(Telemetry t) {this(false); this.t = t;}
 
     public TeamPropProcessor(boolean isBlue)
     {
@@ -85,10 +94,10 @@ public class TeamPropProcessor implements VisionProcessor {
         leftY *= scale;
         leftW *= scale;
         leftH *= scale;
-        rightX *= scale;
-        rightY *= scale;
-        rightW *= scale;
-        rightH *= scale;
+        controlX *= scale;
+        controlY *= scale;
+        controlW *= scale;
+        controlH *= scale;
         centerX *= scale;
         centerY *= scale;
         centerW *= scale;
@@ -98,34 +107,39 @@ public class TeamPropProcessor implements VisionProcessor {
     @Override
     public Mat processFrame(Mat input, long captureTimeNanos)
     {
-        // Convert to greyscale
+        Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
+
         Rect leftCrop = new Rect(leftX, leftY, leftW, leftH);
         Rect centerCrop = new Rect(centerX, centerY, centerW, centerH);
-        Rect rightCrop = new Rect(rightX, rightY, rightW, rightH);
+        Rect controlCrop = new Rect(controlX, controlY, controlW, controlH);
 
-        Mat left = new Mat(input, leftCrop); // TODO this may be inefficient?
-        Mat center = new Mat(input, centerCrop);
-        Mat right = new Mat(input, rightCrop);
+        Mat left = new Mat(YCrCb, leftCrop); // TODO this may be inefficient?
+        Mat center = new Mat(YCrCb, centerCrop);
+        Mat control = new Mat(YCrCb, controlCrop);
 
         double leftDetectionValue = processArea(left);
         double centerDetectionValue = processArea(center);
-        double rightDetectionValue = processArea(right);
-
-        double maxDetection = Math.max(leftDetectionValue, Math.max(centerDetectionValue, rightDetectionValue));
-        double avgDetection = (leftDetectionValue+centerDetectionValue+rightDetectionValue)/3;
-        double confidence = maxDetection/avgDetection;
-        if (confidence > minConfidence) {
-            currentConfidence = confidence;
-            if (leftDetectionValue == maxDetection) {
-                currentPos = PROP_POSITION.LEFT;
-            } else if (rightDetectionValue == maxDetection) {
-                currentPos = PROP_POSITION.RIGHT;
-            } else {
-                currentPos = PROP_POSITION.CENTER;
-            }
+        double controlDetectionValue = processArea(control);
+        if (t != null) {
+            t.addData("left", leftDetectionValue);
+            t.addData("center", centerDetectionValue);
+            t.addData("control", controlDetectionValue);
         }
 
-        return input;
+        double leftConfidence = leftDetectionValue-controlDetectionValue;
+        double centerConfidence = centerDetectionValue-controlDetectionValue;
+        if (leftConfidence > minControlExcedance) {
+            currentConfidence = leftConfidence-minControlExcedance;
+            currentPos = PROP_POSITION.LEFT;
+        } else if (centerConfidence > minControlExcedance) {
+            currentConfidence = centerConfidence-minControlExcedance;
+            currentPos = PROP_POSITION.CENTER;
+        } else {
+            currentConfidence = minControlExcedance-Math.max(centerConfidence, leftConfidence);
+            currentPos = PROP_POSITION.RIGHT;
+        }
+
+        return YCrCb;
     }
 
     private double processArea(Mat area) {
@@ -133,7 +147,7 @@ public class TeamPropProcessor implements VisionProcessor {
         if (isBlue) {
             return avg.val[2];
         } else {
-            return avg.val[0];
+            return avg.val[1];
         }
     }
 
@@ -147,9 +161,12 @@ public class TeamPropProcessor implements VisionProcessor {
 
     public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
         if (userContext != null) {
-            canvas.drawRect((int)(leftX-leftW)*scaleBmpPxToCanvasPx, (int)(leftY-leftH)*scaleBmpPxToCanvasPx, (int)(leftX+leftW)*scaleBmpPxToCanvasPx, (int)(leftY+leftH)*scaleBmpPxToCanvasPx, noDetectPaint);
-            canvas.drawRect((int)(centerX-centerW)*scaleBmpPxToCanvasPx, (int)(centerY-centerH)*scaleBmpPxToCanvasPx, (int)(centerX+centerW)*scaleBmpPxToCanvasPx, (int)(centerY+centerH)*scaleBmpPxToCanvasPx, noDetectPaint);
-            canvas.drawRect((int)(rightX-rightW)*scaleBmpPxToCanvasPx, (int)(rightY-rightH)*scaleBmpPxToCanvasPx, (int)(rightX+rightW)*scaleBmpPxToCanvasPx, (int)(rightY+rightH)*scaleBmpPxToCanvasPx, noDetectPaint);
+            Paint lColor = currentPos == PROP_POSITION.LEFT ? detectPaint : noDetectPaint;
+            Paint cColor = currentPos == PROP_POSITION.CENTER ? detectPaint : noDetectPaint;
+            Paint rColor = currentPos == PROP_POSITION.RIGHT ? detectPaint : noDetectPaint;
+            canvas.drawRect((leftX-leftW)*scaleBmpPxToCanvasPx, (leftY-leftH)*scaleBmpPxToCanvasPx, (leftX+leftW)*scaleBmpPxToCanvasPx, (leftY+leftH)*scaleBmpPxToCanvasPx, lColor);
+            canvas.drawRect((centerX-centerW)*scaleBmpPxToCanvasPx, (centerY-centerH)*scaleBmpPxToCanvasPx, (centerX+centerW)*scaleBmpPxToCanvasPx, (centerY+centerH)*scaleBmpPxToCanvasPx, cColor);
+            canvas.drawRect((controlX - controlW)*scaleBmpPxToCanvasPx, (controlY - controlH)*scaleBmpPxToCanvasPx, (controlX + controlW)*scaleBmpPxToCanvasPx, (controlY + controlH)*scaleBmpPxToCanvasPx, rColor);
         }
     }
 

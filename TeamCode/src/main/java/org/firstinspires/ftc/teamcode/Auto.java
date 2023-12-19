@@ -92,7 +92,8 @@ public class Auto extends CommandbasedOpmode {
     @Override
     public void init_loop() {
 
-        telemetry.addLine("We ran out of time to add tag detection, just start the program now.");
+        telemetry.addData("Prop detection", robot.camera.getPropPosition());
+        telemetry.addData("Prop detection confidence", robot.camera.getPropConfidence());
     }
 
     /*
