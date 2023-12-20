@@ -75,6 +75,10 @@ public class CameraSubsystem extends SubsystemBase {
         return propProcessor.getCurrentConfidence();
     }
 
+    public List<AprilTagDetection> getRawTagDetections() {
+        return aprilTag.getDetections();
+    }
+
     public Pose2d getBackdropPosition() { // TODO
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         if (currentDetections.size() == 0) {

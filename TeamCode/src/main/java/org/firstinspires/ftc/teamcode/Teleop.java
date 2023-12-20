@@ -41,6 +41,7 @@ import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.EnableIntakeSafe;
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 
 /**
@@ -126,5 +127,15 @@ public class Teleop extends CommandbasedOpmode {
     @Override
     public void loop() {
         telemetry.addData("Arm command", scheduler.requiring(robot.arm));
+        for (AprilTagDetection det:robot.camera.getRawTagDetections()) {
+            telemetry.addLine();
+            telemetry.addLine(String.format("April tag with id #%d detected at the following coordinates:", det.id));
+            telemetry.addData("X", det.ftcPose.x);
+            telemetry.addData("Y", det.ftcPose.y);
+            telemetry.addData("Z", det.ftcPose.z);
+            telemetry.addData("Pitch", det.ftcPose.pitch);
+            telemetry.addData("Yaw", det.ftcPose.yaw);
+            telemetry.addData("Roll", det.ftcPose.roll);
+        }
     }
 }
