@@ -59,15 +59,15 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
     private PROP_POSITION currentPos = PROP_POSITION.CENTER;
     private double currentConfidence = 1.0;
 
-    public static double minControlExcedance = 15;
+    public static double minControlExcedance = 12;
 
-    int leftX = 30;
-    int leftY = 155;
-    int centerX = 195;
+    int leftX = 25;
+    int leftY = 165;
+    int centerX = 190;
     int centerY = 158;
-    int controlX = 110;
+    int controlX = 105;
     int controlY = 180;
-    int leftW = 30;
+    int leftW = 25;
     int leftH = 35;
     int centerW = 30;
     int centerH = 20;
@@ -178,9 +178,9 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
             Paint lColor = currentPos == PROP_POSITION.LEFT ? detectPaint : noDetectPaint;
             Paint cColor = currentPos == PROP_POSITION.CENTER ? detectPaint : noDetectPaint;
             Paint rColor = currentPos == PROP_POSITION.RIGHT ? detectPaint : noDetectPaint;
-            canvas.drawRect((leftX-leftW)*scaleBmpPxToCanvasPx, (leftY-leftH)*scaleBmpPxToCanvasPx, (leftX+leftW)*scaleBmpPxToCanvasPx, (leftY+leftH)*scaleBmpPxToCanvasPx, lColor);
-            canvas.drawRect((centerX-centerW)*scaleBmpPxToCanvasPx, (centerY-centerH)*scaleBmpPxToCanvasPx, (centerX+centerW)*scaleBmpPxToCanvasPx, (centerY+centerH)*scaleBmpPxToCanvasPx, cColor);
-            canvas.drawRect((controlX - controlW)*scaleBmpPxToCanvasPx, (controlY - controlH)*scaleBmpPxToCanvasPx, (controlX + controlW)*scaleBmpPxToCanvasPx, (controlY + controlH)*scaleBmpPxToCanvasPx, rColor);
+            canvas.drawRect(onscreenWidth-(leftX+leftW)*scaleBmpPxToCanvasPx, onscreenHeight-(leftY+leftH)*scaleBmpPxToCanvasPx,onscreenWidth-(leftX-leftW)*scaleBmpPxToCanvasPx, onscreenHeight-(leftY-leftH)*scaleBmpPxToCanvasPx,  lColor);
+            canvas.drawRect(onscreenWidth-(centerX+centerW)*scaleBmpPxToCanvasPx, onscreenHeight-(centerY+centerH)*scaleBmpPxToCanvasPx,onscreenWidth-(centerX-centerW)*scaleBmpPxToCanvasPx, onscreenHeight-(centerY-centerH)*scaleBmpPxToCanvasPx,  cColor);
+            canvas.drawRect(onscreenWidth-(controlX + controlW)*scaleBmpPxToCanvasPx, onscreenHeight-(controlY + controlH)*scaleBmpPxToCanvasPx,onscreenWidth-(controlX - controlW)*scaleBmpPxToCanvasPx, onscreenHeight-(controlY - controlH)*scaleBmpPxToCanvasPx,  rColor);
         }
     }
 
