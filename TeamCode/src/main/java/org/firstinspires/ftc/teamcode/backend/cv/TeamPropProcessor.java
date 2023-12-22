@@ -21,22 +21,29 @@
 
 package org.firstinspires.ftc.teamcode.backend.cv;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
 import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.function.Consumer;
+import org.firstinspires.ftc.robotcore.external.function.Continuation;
+import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionProcessor;
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Core;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 @Config
-public class TeamPropProcessor implements VisionProcessor {
+public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
 
     public enum PROP_POSITION {
         LEFT,
@@ -102,6 +109,7 @@ public class TeamPropProcessor implements VisionProcessor {
         centerY *= scale;
         centerW *= scale;
         centerH *= scale;
+        lastFrame.set(Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565));
     }
 
     @Override
@@ -139,6 +147,10 @@ public class TeamPropProcessor implements VisionProcessor {
             currentPos = PROP_POSITION.RIGHT;
         }
 
+        Bitmap b = Bitmap.createBitmap(input.width(), input.height(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(input, b);
+        lastFrame.set(b);
+
         return YCrCb;
     }
 
@@ -168,6 +180,14 @@ public class TeamPropProcessor implements VisionProcessor {
             canvas.drawRect((centerX-centerW)*scaleBmpPxToCanvasPx, (centerY-centerH)*scaleBmpPxToCanvasPx, (centerX+centerW)*scaleBmpPxToCanvasPx, (centerY+centerH)*scaleBmpPxToCanvasPx, cColor);
             canvas.drawRect((controlX - controlW)*scaleBmpPxToCanvasPx, (controlY - controlH)*scaleBmpPxToCanvasPx, (controlX + controlW)*scaleBmpPxToCanvasPx, (controlY + controlH)*scaleBmpPxToCanvasPx, rColor);
         }
+    }
+
+    private final AtomicReference<Bitmap> lastFrame =
+            new AtomicReference<>(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
+
+    @Override
+    public void getFrameBitmap(Continuation<? extends Consumer<Bitmap>> continuation) {
+        continuation.dispatch(bitmapConsumer -> bitmapConsumer.accept(lastFrame.get()));
     }
 
 }

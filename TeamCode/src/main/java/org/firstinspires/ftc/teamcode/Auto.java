@@ -101,6 +101,7 @@ public class Auto extends CommandbasedOpmode {
      */
     @Override
     public void start() {
+        robot.camera.propDetected();
         FollowRRTraj forward = new FollowRRTraj(robot.drivetrain, drive, prepPark);
         Command park;
         scheduler.schedule(false, forward);

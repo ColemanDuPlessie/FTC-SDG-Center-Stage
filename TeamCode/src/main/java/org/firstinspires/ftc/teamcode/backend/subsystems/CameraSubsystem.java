@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.backend.subsystems;
 
 import android.util.Size;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.SubsystemBase;
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.SetDrivingStyle;
+import org.firstinspires.ftc.teamcode.backend.cv.AprilTagProcessorWithDash;
 import org.firstinspires.ftc.teamcode.backend.cv.TeamPropProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -21,17 +23,17 @@ import java.util.List;
 @Config
 public class CameraSubsystem extends SubsystemBase {
 
-    private AprilTagProcessor aprilTag;
-    private TeamPropProcessor propProcessor; // TODO this definitely isn't really an int
+    private AprilTagProcessorWithDash aprilTag;
+    private TeamPropProcessor propProcessor;
     private VisionPortal visionPortal;
 
     boolean teleop;
 
     public void init(HardwareMap ahwMap, boolean isTeleop) {
         teleop = isTeleop;
-        aprilTag = new AprilTagProcessor.Builder()
+        aprilTag = new AprilTagProcessorWithDash.Builder()
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
-                .setLensIntrinsics(822.317/2, 822.317/2, 319.495/2, 242.502/2) // TODO these parameters are fx, fy, cx, cy.
+                .setLensIntrinsics(822.317/2, 822.317/2, 319.495/2, 242.502/2) // these parameters are fx, fy, cx, cy.
                 .build();
 
         // Adjust Image Decimation to trade-off detection-range for detection-rate.
@@ -63,6 +65,7 @@ public class CameraSubsystem extends SubsystemBase {
         } else {
             visionPortal.setProcessorEnabled(aprilTag, false);
             visionPortal.setProcessorEnabled(propProcessor, true);
+            FtcDashboard.getInstance().startCameraStream(propProcessor, 0);
         }
 
     }
