@@ -54,7 +54,7 @@ public class CameraSubsystem extends SubsystemBase {
         builder.addProcessor(aprilTag);
 
         if (!isTeleop) {
-            propProcessor = new TeamPropProcessor(SetDrivingStyle.isBlue); // TODO
+            propProcessor = new TeamPropProcessor(SetDrivingStyle.isBlue);
             builder.addProcessor(propProcessor);
         }
 

@@ -13,11 +13,14 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessorImpl;
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AprilTagProcessorWithDash extends AprilTagProcessorImpl implements CameraStreamSource {
+
+    private Mat flipped = new Mat();
 
     private final AtomicReference<Bitmap> lastFrame =
             new AtomicReference<>(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
@@ -37,10 +40,11 @@ public class AprilTagProcessorWithDash extends AprilTagProcessorImpl implements 
     }
 
     public Object processFrame(Mat input, long captureTimeNanos) {
-        Bitmap b = Bitmap.createBitmap(input.width(), input.height(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(input, b);
+        Core.rotate(input, flipped, Core.ROTATE_180);
+        Bitmap b = Bitmap.createBitmap(flipped.width(), flipped.height(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(flipped, b);
         lastFrame.set(b);
-        return super.processFrame(input, captureTimeNanos);
+        return super.processFrame(flipped, captureTimeNanos);
     }
 
     public static class Builder {

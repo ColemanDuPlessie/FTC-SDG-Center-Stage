@@ -52,6 +52,7 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
     }
 
     Mat YCrCb = new Mat();
+    Mat flipped = new Mat();
 
     private final boolean isBlue;
 
@@ -115,7 +116,8 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
     @Override
     public Mat processFrame(Mat input, long captureTimeNanos)
     {
-        Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
+        Core.rotate(input, flipped, Core.ROTATE_180);
+        Imgproc.cvtColor(flipped, YCrCb, Imgproc.COLOR_RGB2YCrCb);
 
         Rect leftCrop = new Rect(leftX, leftY, leftW, leftH);
         Rect centerCrop = new Rect(centerX, centerY, centerW, centerH);
@@ -147,8 +149,8 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
             currentPos = PROP_POSITION.RIGHT;
         }
 
-        Bitmap b = Bitmap.createBitmap(input.width(), input.height(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(input, b);
+        Bitmap b = Bitmap.createBitmap(flipped.width(), flipped.height(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(flipped, b);
         lastFrame.set(b);
 
         return YCrCb;
