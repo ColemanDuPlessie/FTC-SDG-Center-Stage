@@ -28,8 +28,8 @@ public class AutoTargetBackdrop extends CommandBase {
     private final PIDController turnPID;
 
     public static double speed = 0.35;
-    public static double minYDist = 3;
-    public static double maxYDist = 12;
+    public static double minYDist = 4.5;
+    public static double maxYDist = 12.5;
 
     public AutoTargetBackdrop(DrivetrainSubsystem dt, CameraSubsystem camera, GamepadWrapper gamepad, ElapsedTime aTimer, SlidesSubsystem slides) {
         this.gamepad = gamepad;
