@@ -118,12 +118,15 @@ public class CameraSubsystem extends SubsystemBase {
             }
         }
         if (poseGuesses.size() == 0) {return null;}
-        Pose2d bestGuessPose = new Pose2d();
+        double bestGuessX = 0;
+        double bestGuessY = 0;
+        double bestGuessHeading = 0;
         for (Pose2d toAdd:poseGuesses) {
-            bestGuessPose = bestGuessPose.plus(toAdd);
+            bestGuessX += toAdd.getX();
+            bestGuessY += toAdd.getY();
+            bestGuessHeading += toAdd.getHeading();
         }
-        bestGuessPose = bestGuessPose.div(poseGuesses.size());
-        return bestGuessPose;
+        return new Pose2d(bestGuessX, bestGuessY, bestGuessHeading);
     }
 
     public void stopStream() {visionPortal.stopStreaming();}

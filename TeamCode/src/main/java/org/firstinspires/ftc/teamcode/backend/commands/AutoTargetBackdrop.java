@@ -20,12 +20,12 @@ public class AutoTargetBackdrop extends CommandBase {
     private final SlidesSubsystem slides;
     private final GamepadWrapper gamepad;
 
-    public static double kPf = 0.5;
+    public static double kPf = 0.2;
     public static double kIf = 0.000;
-    public static double kDf = 1.0;
-    public static double kPt = 0.7;
-    public static double kIt = 0.03;
-    public static double kDt = 1.4;
+    public static double kDf = 0.4;
+    public static double kPt = 0.3;
+    public static double kIt = 0.01;
+    public static double kDt = 0.6;
 
     private final PIDController forwardPID;
     private final PIDController turnPID;
