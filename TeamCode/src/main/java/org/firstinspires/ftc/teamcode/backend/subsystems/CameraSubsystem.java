@@ -50,7 +50,7 @@ public class CameraSubsystem extends SubsystemBase {
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
         builder.setCamera(ahwMap.get(WebcamName.class, "Camera"));
-        builder.setCameraResolution(new Size(320, 240));
+        builder.setCameraResolution(new Size(640, 480));
         builder.enableLiveView(true);
         builder.setStreamFormat(VisionPortal.StreamFormat.YUY2); // Alternative is MJPEG
         builder.setAutoStopLiveView(true);
