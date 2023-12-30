@@ -32,6 +32,7 @@ public class AutoTargetBackdrop extends CommandBase {
 
     private double forward;
     private double turn;
+    private double targetYDist;
     private Pose2d currentPose;
     private Pose2d rollingAverageTruePose = new Pose2d(0, 0, 0);
     public static double truePoseDecay = 0.75;
@@ -56,7 +57,7 @@ public class AutoTargetBackdrop extends CommandBase {
 
     @Override
     public void execute() {
-        double targetYDist = slides.getPosition()*(maxYDist-minYDist)+maxYDist;
+        targetYDist = slides.getPosition()*(maxYDist-minYDist)+maxYDist;
         currentPose = camera.getBackdropPosition();
         if (currentPose == null) { // If we have no detections, use slow, careful manual control
             forward = gamepad.getLeftStickY()*0.25;
@@ -78,12 +79,14 @@ public class AutoTargetBackdrop extends CommandBase {
 
     public void debug(Telemetry t) {
         if (currentPose != null) {
-            t.addData("X dist", currentPose.getX());
-            t.addData("Y dist", currentPose.getY());
-            t.addData("Heading", currentPose.getHeading());
+            t.addData("X dist", rollingAverageTruePose.getX());
+            t.addData("Y dist", rollingAverageTruePose.getY());
+            t.addData("Target Y dist", targetYDist);
+            t.addData("Heading", rollingAverageTruePose.getHeading());
             t.addLine();
             t.addData("Y spd", forward);
             t.addData("turn spd", turn);
+            t.addLine();
         }
     }
 }

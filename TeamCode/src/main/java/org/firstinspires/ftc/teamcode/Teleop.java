@@ -131,6 +131,8 @@ public class Teleop extends CommandbasedOpmode {
     public void loop() {
         telemetry.addData("Arm command", scheduler.requiring(robot.arm));
         telemetry.addData("Drivetrain command", scheduler.requiring(robot.drivetrain));
+        telemetry.addData("Slides target position", robot.slides.getTargetPosition());
+        telemetry.addData("Slides actual position", robot.slides.getPosition());
         if (scheduler.requiring(robot.drivetrain) instanceof AutoTargetBackdrop) {
             ((AutoTargetBackdrop) scheduler.requiring(robot.drivetrain)).debug(telemetry);
         }
