@@ -130,6 +130,10 @@ public class Teleop extends CommandbasedOpmode {
     @Override
     public void loop() {
         telemetry.addData("Arm command", scheduler.requiring(robot.arm));
+        telemetry.addData("Drivetrain command", scheduler.requiring(robot.drivetrain));
+        if (scheduler.requiring(robot.drivetrain) instanceof AutoTargetBackdrop) {
+            ((AutoTargetBackdrop) scheduler.requiring(robot.drivetrain)).debug(telemetry);
+        }
         for (AprilTagDetection det:robot.camera.getRawTagDetections()) {
             telemetry.addLine();
             telemetry.addLine(String.format("April tag with id #%d detected at the following coordinates:", det.id));
