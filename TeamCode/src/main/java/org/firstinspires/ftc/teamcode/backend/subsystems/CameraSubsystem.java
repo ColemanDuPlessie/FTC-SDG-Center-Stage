@@ -88,7 +88,7 @@ public class CameraSubsystem extends SubsystemBase {
     public Pose2d getBackdropPosition() { // TODO
         /**
          * Returns a pose2d whose origin is the center AprilTag and whose heading 0 is pointing
-         * toward the backdrop.
+         * toward the backdrop. Note that we ignore a lot of heading info because it's unreliable
          */
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         if (currentDetections.size() == 0) {
@@ -107,7 +107,7 @@ public class CameraSubsystem extends SubsystemBase {
         for (AprilTagDetection detection : currentDetections) {
             if (detection.metadata != null) {
                 if (Arrays.stream(targetIds).anyMatch(i -> i == detection.id)) {
-                    Pose2d tempPose = new Pose2d(new Vector2d(detection.ftcPose.x, detection.ftcPose.y).rotated(detection.ftcPose.yaw), -detection.ftcPose.yaw);
+                    Pose2d tempPose = new Pose2d(new Vector2d(detection.ftcPose.x, detection.ftcPose.y), -detection.ftcPose.yaw); // There was previously a .rotated(yaw) after the vector definition, but it seemed to negatively impact performance.
                     if (detection.id % 3 == 1) {
                         tempPose.minus(new Pose2d(6, 0, 0));
                     } else if (detection.id % 3 == 0) {

@@ -23,12 +23,8 @@ public class AutoTargetBackdrop extends CommandBase {
     public static double kPf = 0.2;
     public static double kIf = 0.000;
     public static double kDf = 0.4;
-    public static double kPt = 0.3;
-    public static double kIt = 0.01;
-    public static double kDt = 0.6;
 
     private final PIDController forwardPID;
-    private final PIDController turnPID;
 
     private double forward;
     private double turn;
@@ -48,7 +44,6 @@ public class AutoTargetBackdrop extends CommandBase {
         addRequirements(dt);
         addRequirements(camera);
         forwardPID = new PIDController(kPf, kIf, kDf, aTimer);
-        turnPID = new PIDController(kPt, kIt, kDt, aTimer);
         this.slides = slides;
     }
 
@@ -61,13 +56,13 @@ public class AutoTargetBackdrop extends CommandBase {
         currentPose = camera.getBackdropPosition();
         if (currentPose == null) { // If we have no detections, use slow, careful manual control
             forward = gamepad.getLeftStickY()*0.25;
-            turn = gamepad.getRightStickX()*0.5;
+
         } else { // If we have at least one detection, use it instead
             rollingAverageTruePose = rollingAverageTruePose.times(truePoseDecay).plus(currentPose.times(1.0-truePoseDecay));
             forward = forwardPID.update(-rollingAverageTruePose.getY(), targetYDist);
-            turn = -turnPID.update(rollingAverageTruePose.getHeading(), 0.0);
         }
-        double strafe = gamepad.getLeftStickX()*0.5; // Always strafe manually
+        turn = gamepad.getRightStickX()*0.5;
+        double strafe = gamepad.getLeftStickX()*0.5; // Always strafe and turn manually
         dt.driveSimple(forward, turn, strafe, speed);
     }
 
@@ -80,7 +75,7 @@ public class AutoTargetBackdrop extends CommandBase {
     public void debug(Telemetry t) {
         if (currentPose != null) {
             t.addData("X dist", rollingAverageTruePose.getX());
-            t.addData("Y dist", rollingAverageTruePose.getY());
+            t.addData("Y dist", -rollingAverageTruePose.getY());
             t.addData("Target Y dist", targetYDist);
             t.addData("Heading", rollingAverageTruePose.getHeading());
             t.addLine();
