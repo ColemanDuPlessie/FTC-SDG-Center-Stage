@@ -64,7 +64,7 @@ public class AutoTargetBackdrop extends CommandBase {
             turn = gamepad.getRightStickX()*0.5;
         } else { // If we have at least one detection, use it instead
             rollingAverageTruePose = rollingAverageTruePose.times(truePoseDecay).plus(currentPose.times(1.0-truePoseDecay));
-            forward = forwardPID.update(rollingAverageTruePose.getY(), targetYDist);
+            forward = forwardPID.update(-rollingAverageTruePose.getY(), targetYDist);
             turn = -turnPID.update(rollingAverageTruePose.getHeading(), 0.0);
         }
         double strafe = gamepad.getLeftStickX()*0.5; // Always strafe manually
