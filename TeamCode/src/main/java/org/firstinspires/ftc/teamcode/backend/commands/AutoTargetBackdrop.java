@@ -37,7 +37,7 @@ public class AutoTargetBackdrop extends CommandBase {
     private Pose2d rollingAverageTruePose = new Pose2d(0, 0, 0);
     public static double truePoseDecay = 0.75;
 
-    public static double speed = 0.18;
+    public static double speed = 0.225;
     public static double minYDist = 4.5;
     public static double maxYDist = 12.5;
 
@@ -57,14 +57,14 @@ public class AutoTargetBackdrop extends CommandBase {
 
     @Override
     public void execute() {
-        targetYDist = slides.getPosition()*(maxYDist-minYDist)+maxYDist;
+        targetYDist = slides.getPosition()*(maxYDist-minYDist)+minYDist;
         currentPose = camera.getBackdropPosition();
         if (currentPose == null) { // If we have no detections, use slow, careful manual control
             forward = gamepad.getLeftStickY()*0.25;
             turn = gamepad.getRightStickX()*0.5;
         } else { // If we have at least one detection, use it instead
             rollingAverageTruePose = rollingAverageTruePose.times(truePoseDecay).plus(currentPose.times(1.0-truePoseDecay));
-            forward = -forwardPID.update(rollingAverageTruePose.getY(), targetYDist);
+            forward = forwardPID.update(rollingAverageTruePose.getY(), targetYDist);
             turn = -turnPID.update(rollingAverageTruePose.getHeading(), 0.0);
         }
         double strafe = gamepad.getLeftStickX()*0.5; // Always strafe manually
