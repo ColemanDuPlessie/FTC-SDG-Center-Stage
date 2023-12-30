@@ -36,7 +36,7 @@ public class CameraSubsystem extends SubsystemBase {
         teleop = isTeleop;
         aprilTag = new AprilTagProcessorWithDash.Builder()
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
-                .setLensIntrinsics(822.317/2, 822.317/2, 319.495/2, 242.502/2) // these parameters are fx, fy, cx, cy.
+                .setLensIntrinsics(822.317, 822.317, 319.495, 242.502) // these parameters are fx, fy, cx, cy.
                 .build();
 
         // Adjust Image Decimation to trade-off detection-range for detection-rate.
