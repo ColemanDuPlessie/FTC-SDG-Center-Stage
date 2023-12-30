@@ -5,6 +5,7 @@ import android.util.Size;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -18,6 +19,8 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Config
@@ -83,19 +86,44 @@ public class CameraSubsystem extends SubsystemBase {
     }
 
     public Pose2d getBackdropPosition() { // TODO
+        /**
+         * Returns a pose2d whose origin is the center AprilTag and whose heading 0 is pointing
+         * toward the backdrop.
+         */
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         if (currentDetections.size() == 0) {
             return null;
         }
 
+        int[] targetIds;
+        if (SetDrivingStyle.isBlue) {
+            targetIds = new int[]{1, 2, 3};
+        } else {
+            targetIds = new int[]{4, 5, 6};
+        }
+
+        ArrayList<Pose2d> poseGuesses = new ArrayList<Pose2d>();
+
         for (AprilTagDetection detection : currentDetections) {
             if (detection.metadata != null) {
-                // detection.id;
-                // detection.metadata.name;
-                // detection.ftcPose
+                if (Arrays.stream(targetIds).anyMatch(i -> i == detection.id)) {
+                    Pose2d tempPose = new Pose2d(new Vector2d(detection.ftcPose.x, detection.ftcPose.y).rotated(detection.ftcPose.yaw), -detection.ftcPose.yaw);
+                    if (detection.id % 3 == 1) {
+                        tempPose.minus(new Pose2d(6, 0, 0));
+                    } else if (detection.id % 3 == 0) {
+                        tempPose.plus(new Pose2d(6, 0, 0));
+                    }
+                    poseGuesses.add(tempPose);
+                }
             }
         }
-        return null;
+        if (poseGuesses.size() == 0) {return null;}
+        Pose2d bestGuessPose = new Pose2d();
+        for (Pose2d toAdd:poseGuesses) {
+            bestGuessPose = bestGuessPose.plus(toAdd);
+        }
+        bestGuessPose = bestGuessPose.div(poseGuesses.size());
+        return bestGuessPose;
     }
 
     public void stopStream() {visionPortal.stopStreaming();}
