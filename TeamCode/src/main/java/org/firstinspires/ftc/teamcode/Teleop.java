@@ -38,6 +38,7 @@ import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareIncrementSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareSetSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.AutoTargetBackdrop;
 import org.firstinspires.ftc.teamcode.backend.commands.DriveFromGamepad;
+import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedAutoTargetedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.EnableIntakeSafe;
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
@@ -74,7 +75,9 @@ public class Teleop extends CommandbasedOpmode {
     }
 
     private void xPressed() {
-        if (robot.wrist.getTargetPosition() == WristSubsystem.readyPosition) {
+        if (pad1.getY()) {
+            scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer));
+        } else if (robot.wrist.getTargetPosition() == WristSubsystem.readyPosition) {
             scheduler.schedule(new DriverAssistedDeposit(robot.arm, robot.wrist, timer));
         } else {
             toggleArm();
