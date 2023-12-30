@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.backend.CommandbasedOpmode;
 import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareIncrementSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareSetSlides;
+import org.firstinspires.ftc.teamcode.backend.commands.AutoTargetBackdrop;
 import org.firstinspires.ftc.teamcode.backend.commands.DriveFromGamepad;
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.EnableIntakeSafe;
@@ -103,14 +104,14 @@ public class Teleop extends CommandbasedOpmode {
         GamepadEx gamepad = new GamepadEx(gamepad1);
 
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whenReleased(() -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer)));
+                .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer));
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .whenReleased(() -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.5, timer)));
+                .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.5, timer));
 
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-                .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer))); // TODO closely inspect setpoints
+                .whenReleased(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer)); // TODO closely inspect setpoints
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer)));
+                .whenReleased(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer));
 
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenReleased(this::toggleArm);
@@ -120,7 +121,9 @@ public class Teleop extends CommandbasedOpmode {
         gamepad.getGamepadButton(GamepadKeys.Button.X)
                 .whenReleased(this::xPressed);
         gamepad.getGamepadButton(GamepadKeys.Button.B)
-            .whenReleased(() -> toggleIntake(true));
+                .whenReleased(() -> toggleIntake(true));
+        gamepad.getGamepadButton(GamepadKeys.Button.Y)
+                .whenPressed(new AutoTargetBackdrop(robot.drivetrain, robot.camera, pad1, timer, robot.slides));
 
     }
 
