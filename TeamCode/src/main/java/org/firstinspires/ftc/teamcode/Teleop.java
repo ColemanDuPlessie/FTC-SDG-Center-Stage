@@ -118,9 +118,9 @@ public class Teleop extends CommandbasedOpmode {
                 .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.5, timer));
 
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-                .whenReleased(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer)); // TODO closely inspect setpoints
+                .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer))); // TODO closely inspect setpoints
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whenReleased(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer, robot.intake));
+                .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer, robot.intake)));
 
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenReleased(this::toggleArm);
@@ -145,6 +145,9 @@ public class Teleop extends CommandbasedOpmode {
         telemetry.addData("Slides actual position", robot.slides.getPosition());
         if (scheduler.requiring(robot.drivetrain) instanceof AutoTargetBackdrop) {
             ((AutoTargetBackdrop) scheduler.requiring(robot.drivetrain)).debug(telemetry);
+        }
+        if (scheduler.requiring(robot.slides) instanceof ArmAwareSetSlides) {
+            ((ArmAwareSetSlides) scheduler.requiring(robot.slides)).debug(telemetry);
         }
         for (AprilTagDetection det:robot.camera.getRawTagDetections()) {
             if (det == null) {continue;}

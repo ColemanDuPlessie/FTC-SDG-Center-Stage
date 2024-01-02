@@ -18,8 +18,8 @@ public class SlidesSubsystem extends SubsystemBase implements PositionControlled
 
     private PIDController PIDF;
 
-    public static int minPosition = -50; // Added to ensure complete retraction
-    public static int maxPosition = 2650; // Can theoretically go up to 3/4 of 3825. Lowered for safety
+    public static int minPosition = -60; // Added to ensure complete retraction
+    public static int maxPosition = 2650;
 
     public static double kP = 0.007; // TODO tune this
     public static double kI = 0.0000;

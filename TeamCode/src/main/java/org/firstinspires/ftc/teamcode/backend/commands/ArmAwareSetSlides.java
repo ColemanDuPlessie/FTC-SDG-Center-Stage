@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.SlidesSubsystem;
@@ -46,7 +47,7 @@ public class ArmAwareSetSlides extends CommandBase {
 
     public ArmAwareSetSlides(SlidesSubsystem s, ArmSubsystem a, WristSubsystem w, double targetPos, ElapsedTime timer, IntakeSubsystem i) {
         this(s, a ,w, targetPos, timer);
-        if (targetPos == 0) {
+        if (targetPos < intakeEnablePoint) {
             intake = i;
             addRequirements(i);
         }
@@ -75,9 +76,8 @@ public class ArmAwareSetSlides extends CommandBase {
             slides.setTargetPosition(targetPos);
         }
 
-        if (targetPos == 0 && intake != null) {
+        if (targetPos < intakeEnablePoint && intake != null) {
             waitToIntake = true;
-            waitToDisableIntake = true;
         }
     }
 
@@ -87,6 +87,7 @@ public class ArmAwareSetSlides extends CommandBase {
             intake.setSpeed(intakePower);
             intakeEnableTime = (long) timer.milliseconds();
             waitToIntake = false;
+            waitToDisableIntake = true;
         }
         if (waitToDisableIntake && ((long) timer.milliseconds()) - intakeEnableTime >= intakeRuntime) {
             intake.hold();
@@ -104,9 +105,13 @@ public class ArmAwareSetSlides extends CommandBase {
     }
 
     @Override
-    public boolean isFinished() {return !(waitToLower || waitToRaise || waitToDisableIntake);}
+    public boolean isFinished() {return !(waitToLower || waitToRaise || waitToIntake || waitToDisableIntake);}
 
     @Override
     public void end(boolean interrupted) {
+    }
+
+    public void debug(Telemetry t) {
+        t.addData("Target position:", targetPos);
     }
 }
