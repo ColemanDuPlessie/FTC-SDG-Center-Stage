@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 @Config
 public class DriverAssistedDeposit extends CommandBase {
 
-    public static long depositWaitTime = 1500;
+    public static long depositWaitTime = 1000;
 
     private ElapsedTime timer;
     private long startMillis;

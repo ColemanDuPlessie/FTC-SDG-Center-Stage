@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 @Config
 public class ReadyArmCarefully extends CommandBase {
 
-    public static long duration = 750;
+    public static long duration = 500;
 
     private ElapsedTime timer;
     private long startMillis;
