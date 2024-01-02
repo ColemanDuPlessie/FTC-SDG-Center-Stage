@@ -25,8 +25,8 @@ public class ArmAwareSetSlides extends CommandBase {
     private IntakeSubsystem intake = null;
     public static long intakeRuntime = 500;
     public static double intakePower = -0.35;
-    public static long maxIntakeDelay = 2500;
-    private long intakeDelay;
+    public static double intakeEnablePoint = 0.05;
+    private long intakeEnableTime;
     private boolean waitToIntake = false;
     private boolean waitToDisableIntake = false;
 
@@ -75,8 +75,6 @@ public class ArmAwareSetSlides extends CommandBase {
             slides.setTargetPosition(targetPos);
         }
 
-        intakeDelay = (long)(maxIntakeDelay * startPos);
-        if (waitToLower) {intakeDelay += armTravelWaitTime;}
         if (targetPos == 0 && intake != null) {
             waitToIntake = true;
             waitToDisableIntake = true;
@@ -85,11 +83,12 @@ public class ArmAwareSetSlides extends CommandBase {
 
     @Override
     public void execute() {
-        if (waitToIntake && ((long) timer.milliseconds()) - startMillis >= intakeDelay) {
+        if (waitToIntake && slides.getPosition() < intakeEnablePoint) {
             intake.setSpeed(intakePower);
+            intakeEnableTime = (long) timer.milliseconds();
             waitToIntake = false;
         }
-        if (waitToDisableIntake && ((long) timer.milliseconds()) - startMillis >= intakeDelay + intakeRuntime) {
+        if (waitToDisableIntake && ((long) timer.milliseconds()) - intakeEnableTime >= intakeRuntime) {
             intake.hold();
             waitToDisableIntake = false;
         }
