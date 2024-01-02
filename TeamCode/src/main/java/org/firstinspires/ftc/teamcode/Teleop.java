@@ -41,6 +41,7 @@ import org.firstinspires.ftc.teamcode.backend.commands.DriveFromGamepad;
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedAutoTargetedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.EnableIntakeSafe;
+import org.firstinspires.ftc.teamcode.backend.commands.ReadyArmCarefully;
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -70,8 +71,12 @@ public class Teleop extends CommandbasedOpmode {
     }
 
     private void toggleArm() {
-        robot.arm.toggle();
-        robot.wrist.toggle();
+        if (robot.arm.getTargetPosition() == ArmSubsystem.waitingPosition) {
+            scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer));
+        } else {
+            robot.arm.toggle();
+            robot.wrist.toggle();
+        }
     }
 
     private void xPressed() {
@@ -90,7 +95,8 @@ public class Teleop extends CommandbasedOpmode {
                 scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer, isReversed));
                 return;
             } else {
-                toggleArm();
+                robot.arm.toggle();
+                robot.wrist.toggle();
             }
         }
         if (isReversed) {
