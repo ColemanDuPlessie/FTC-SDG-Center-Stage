@@ -113,14 +113,14 @@ public class Teleop extends CommandbasedOpmode {
         GamepadEx gamepad = new GamepadEx(gamepad1);
 
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer));
+                .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake));
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
                 .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.5, timer));
 
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenReleased(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer)); // TODO closely inspect setpoints
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whenReleased(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer));
+                .whenReleased(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer, robot.intake));
 
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenReleased(this::toggleArm);
