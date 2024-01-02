@@ -146,6 +146,7 @@ public class Teleop extends CommandbasedOpmode {
             ((AutoTargetBackdrop) scheduler.requiring(robot.drivetrain)).debug(telemetry);
         }
         for (AprilTagDetection det:robot.camera.getRawTagDetections()) {
+            if (det == null) {continue;}
             telemetry.addLine();
             telemetry.addLine(String.format("April tag with id #%d detected at the following coordinates:", det.id));
             telemetry.addData("X", det.ftcPose.x);
