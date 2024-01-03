@@ -5,22 +5,21 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
-import org.firstinspires.ftc.teamcode.backend.subsystems.SlidesSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 
 @Config
-public class DriverAssistedDeposit extends CommandBase {
+public class ReadyArmCarefully extends CommandBase {
 
-    public static long depositWaitTime = 1000;
+    public static long duration = 500;
 
     private ElapsedTime timer;
     private long startMillis;
     private ArmSubsystem arm;
     private WristSubsystem wrist;
+    private double startWristPos;
+    private double startArmPos;
 
-    private boolean waitToRetract = true;
-
-    public DriverAssistedDeposit(ArmSubsystem a, WristSubsystem w, ElapsedTime timer) {
+    public ReadyArmCarefully(ArmSubsystem a, WristSubsystem w, ElapsedTime timer) {
         arm = a;
         wrist = w;
         addRequirements(a);
@@ -35,22 +34,25 @@ public class DriverAssistedDeposit extends CommandBase {
          * the arm and center for the wrist).
          */
         this.startMillis = (long) timer.milliseconds();
+        startWristPos = wrist.getPosition();
+        startArmPos = arm.getPosition();
         wrist.deposit();
     }
 
     @Override
     public void execute() {
-        if (waitToRetract && ((long) timer.milliseconds()) - startMillis >= depositWaitTime) {
-            wrist.center();
-            arm.center();
-            waitToRetract = false;
-        }
+        double completeness = (timer.milliseconds() - startMillis) / duration;
+        completeness = Math.min(completeness, 1.0);
+        wrist.setTargetPosition(WristSubsystem.readyPosition*completeness + startWristPos*(1-completeness));
+        arm.setTargetPosition(ArmSubsystem.upPosition*completeness + startArmPos*(1-completeness));
     }
 
     @Override
-    public boolean isFinished() {return !waitToRetract;}
+    public boolean isFinished() {return ((long) timer.milliseconds()) - startMillis >= duration;}
 
     @Override
     public void end(boolean interrupted) {
+        wrist.ready();
+        arm.deposit();
     }
 }

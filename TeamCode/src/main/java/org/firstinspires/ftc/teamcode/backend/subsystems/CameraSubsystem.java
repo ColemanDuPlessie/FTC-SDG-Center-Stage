@@ -36,7 +36,7 @@ public class CameraSubsystem extends SubsystemBase {
         teleop = isTeleop;
         aprilTag = new AprilTagProcessorWithDash.Builder()
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
-                .setLensIntrinsics(822.317/2, 822.317/2, 319.495/2, 242.502/2) // these parameters are fx, fy, cx, cy.
+                .setLensIntrinsics(822.317, 822.317, 319.495, 242.502) // these parameters are fx, fy, cx, cy.
                 .build();
 
         // Adjust Image Decimation to trade-off detection-range for detection-rate.
@@ -50,7 +50,7 @@ public class CameraSubsystem extends SubsystemBase {
 
         VisionPortal.Builder builder = new VisionPortal.Builder();
         builder.setCamera(ahwMap.get(WebcamName.class, "Camera"));
-        builder.setCameraResolution(new Size(320, 240));
+        builder.setCameraResolution(new Size(640, 480));
         builder.enableLiveView(true);
         builder.setStreamFormat(VisionPortal.StreamFormat.YUY2); // Alternative is MJPEG
         builder.setAutoStopLiveView(true);
@@ -88,7 +88,7 @@ public class CameraSubsystem extends SubsystemBase {
     public Pose2d getBackdropPosition() { // TODO
         /**
          * Returns a pose2d whose origin is the center AprilTag and whose heading 0 is pointing
-         * toward the backdrop.
+         * toward the backdrop. Note that we ignore a lot of heading info because it's unreliable
          */
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         if (currentDetections.size() == 0) {
@@ -107,7 +107,7 @@ public class CameraSubsystem extends SubsystemBase {
         for (AprilTagDetection detection : currentDetections) {
             if (detection.metadata != null) {
                 if (Arrays.stream(targetIds).anyMatch(i -> i == detection.id)) {
-                    Pose2d tempPose = new Pose2d(new Vector2d(detection.ftcPose.x, detection.ftcPose.y).rotated(detection.ftcPose.yaw), -detection.ftcPose.yaw);
+                    Pose2d tempPose = new Pose2d(new Vector2d(detection.ftcPose.x, detection.ftcPose.y), -detection.ftcPose.yaw); // There was previously a .rotated(yaw) after the vector definition, but it seemed to negatively impact performance.
                     if (detection.id % 3 == 1) {
                         tempPose.minus(new Pose2d(6, 0, 0));
                     } else if (detection.id % 3 == 0) {
@@ -118,12 +118,15 @@ public class CameraSubsystem extends SubsystemBase {
             }
         }
         if (poseGuesses.size() == 0) {return null;}
-        Pose2d bestGuessPose = new Pose2d();
+        double bestGuessX = 0;
+        double bestGuessY = 0;
+        double bestGuessHeading = 0;
         for (Pose2d toAdd:poseGuesses) {
-            bestGuessPose = bestGuessPose.plus(toAdd);
+            bestGuessX += toAdd.getX();
+            bestGuessY += toAdd.getY();
+            bestGuessHeading += toAdd.getHeading();
         }
-        bestGuessPose = bestGuessPose.div(poseGuesses.size());
-        return bestGuessPose;
+        return new Pose2d(bestGuessX, bestGuessY, bestGuessHeading);
     }
 
     public void stopStream() {visionPortal.stopStreaming();}

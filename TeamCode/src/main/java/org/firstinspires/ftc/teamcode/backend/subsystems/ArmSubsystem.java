@@ -16,6 +16,7 @@ public class ArmSubsystem extends SubsystemBase {
     public static double downWaitingPosition = 0.82; // 0.06;
     public static double waitingPosition = 0.40; // 0.50;
     public static double upPosition = 0.15; // 0.70;
+    public static double upAutoTargetedPosition = 0.05;
 
     public static double altServoOffsetPosition = 0.00;
 
@@ -47,6 +48,7 @@ public class ArmSubsystem extends SubsystemBase {
     public void holding() {setTargetPosition(downWaitingPosition);}
     public void center() {setTargetPosition(waitingPosition);}
     public void deposit() {setTargetPosition(upPosition);}
+    public void depositAutoTargeted() {setTargetPosition(upAutoTargetedPosition);}
 
     public void toggle() {
         if (getTargetPosition() == downWaitingPosition) {

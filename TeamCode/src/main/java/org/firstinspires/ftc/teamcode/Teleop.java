@@ -38,8 +38,10 @@ import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareIncrementSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareSetSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.AutoTargetBackdrop;
 import org.firstinspires.ftc.teamcode.backend.commands.DriveFromGamepad;
+import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedAutoTargetedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.EnableIntakeSafe;
+import org.firstinspires.ftc.teamcode.backend.commands.ReadyArmCarefully;
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -69,12 +71,18 @@ public class Teleop extends CommandbasedOpmode {
     }
 
     private void toggleArm() {
-        robot.arm.toggle();
-        robot.wrist.toggle();
+        if (robot.arm.getTargetPosition() == ArmSubsystem.waitingPosition) {
+            scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer));
+        } else {
+            robot.arm.toggle();
+            robot.wrist.toggle();
+        }
     }
 
     private void xPressed() {
-        if (robot.wrist.getTargetPosition() == WristSubsystem.readyPosition) {
+        if (pad1.getY()) {
+            scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer));
+        } else if (robot.wrist.getTargetPosition() == WristSubsystem.readyPosition) {
             scheduler.schedule(new DriverAssistedDeposit(robot.arm, robot.wrist, timer));
         } else {
             toggleArm();
@@ -87,7 +95,8 @@ public class Teleop extends CommandbasedOpmode {
                 scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer, isReversed));
                 return;
             } else {
-                toggleArm();
+                robot.arm.toggle();
+                robot.wrist.toggle();
             }
         }
         if (isReversed) {
@@ -104,14 +113,14 @@ public class Teleop extends CommandbasedOpmode {
         GamepadEx gamepad = new GamepadEx(gamepad1);
 
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer));
+                .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake));
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
                 .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.5, timer));
 
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-                .whenReleased(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer)); // TODO closely inspect setpoints
+                .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer))); // TODO closely inspect setpoints
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whenReleased(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer));
+                .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer, robot.intake)));
 
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenReleased(this::toggleArm);
@@ -130,7 +139,18 @@ public class Teleop extends CommandbasedOpmode {
     @Override
     public void loop() {
         telemetry.addData("Arm command", scheduler.requiring(robot.arm));
+        telemetry.addData("Drivetrain command", scheduler.requiring(robot.drivetrain));
+        telemetry.addData("Slides command", scheduler.requiring(robot.slides));
+        telemetry.addData("Slides target position", robot.slides.getTargetPosition());
+        telemetry.addData("Slides actual position", robot.slides.getPosition());
+        if (scheduler.requiring(robot.drivetrain) instanceof AutoTargetBackdrop) {
+            ((AutoTargetBackdrop) scheduler.requiring(robot.drivetrain)).debug(telemetry);
+        }
+        if (scheduler.requiring(robot.slides) instanceof ArmAwareSetSlides) {
+            ((ArmAwareSetSlides) scheduler.requiring(robot.slides)).debug(telemetry);
+        }
         for (AprilTagDetection det:robot.camera.getRawTagDetections()) {
+            if (det == null) {continue;}
             telemetry.addLine();
             telemetry.addLine(String.format("April tag with id #%d detected at the following coordinates:", det.id));
             telemetry.addData("X", det.ftcPose.x);

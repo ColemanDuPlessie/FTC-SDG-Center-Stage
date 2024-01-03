@@ -4,14 +4,16 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.SlidesSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 
 @Config
 public class ArmAwareSetSlides extends CommandBase {
 
-    public static double changeoverPosition = 0.30;
+    public static double changeoverPosition = 0.25;
     public static long armTravelWaitTime = 500;
 
     private ElapsedTime timer;
@@ -20,6 +22,14 @@ public class ArmAwareSetSlides extends CommandBase {
     private SlidesSubsystem slides;
     private ArmSubsystem arm;
     private WristSubsystem wrist;
+
+    private IntakeSubsystem intake = null;
+    public static long intakeRuntime = 500;
+    public static double intakePower = -0.35;
+    public static double intakeEnablePoint = 0.05;
+    private long intakeEnableTime;
+    private boolean waitToIntake = false;
+    private boolean waitToDisableIntake = false;
 
     private boolean waitToLower = false;
     private boolean waitToRaise = false;
@@ -33,6 +43,14 @@ public class ArmAwareSetSlides extends CommandBase {
         addRequirements(w);
         this.targetPos = targetPos;
         this.timer = timer;
+    }
+
+    public ArmAwareSetSlides(SlidesSubsystem s, ArmSubsystem a, WristSubsystem w, double targetPos, ElapsedTime timer, IntakeSubsystem i) {
+        this(s, a ,w, targetPos, timer);
+        if (targetPos < intakeEnablePoint) {
+            intake = i;
+            addRequirements(i);
+        }
     }
 
     @Override
@@ -57,10 +75,24 @@ public class ArmAwareSetSlides extends CommandBase {
             wrist.center();
             slides.setTargetPosition(targetPos);
         }
+
+        if (targetPos < intakeEnablePoint && intake != null) {
+            waitToIntake = true;
+        }
     }
 
     @Override
     public void execute() {
+        if (waitToIntake && slides.getPosition() < intakeEnablePoint) {
+            intake.setSpeed(intakePower);
+            intakeEnableTime = (long) timer.milliseconds();
+            waitToIntake = false;
+            waitToDisableIntake = true;
+        }
+        if (waitToDisableIntake && ((long) timer.milliseconds()) - intakeEnableTime >= intakeRuntime) {
+            intake.hold();
+            waitToDisableIntake = false;
+        }
         if (waitToLower && ((long) timer.milliseconds()) - startMillis >= armTravelWaitTime) {
             slides.setTargetPosition(targetPos);
             waitToLower = false;
@@ -73,9 +105,13 @@ public class ArmAwareSetSlides extends CommandBase {
     }
 
     @Override
-    public boolean isFinished() {return !(waitToLower || waitToRaise);}
+    public boolean isFinished() {return !(waitToLower || waitToRaise || waitToIntake || waitToDisableIntake);}
 
     @Override
     public void end(boolean interrupted) {
+    }
+
+    public void debug(Telemetry t) {
+        t.addData("Target position:", targetPos);
     }
 }

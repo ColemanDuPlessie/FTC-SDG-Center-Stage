@@ -5,22 +5,23 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
-import org.firstinspires.ftc.teamcode.backend.subsystems.SlidesSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 
 @Config
-public class DriverAssistedDeposit extends CommandBase {
+public class DriverAssistedAutoTargetedDeposit extends CommandBase {
 
-    public static long depositWaitTime = 1000;
+    public static long armTravelWaitTime = 500;
+    public static long depositWaitTime = 1500; // Counting from 0, not from the previous event
 
     private ElapsedTime timer;
     private long startMillis;
     private ArmSubsystem arm;
     private WristSubsystem wrist;
 
+    private boolean waitToDeposit = true;
     private boolean waitToRetract = true;
 
-    public DriverAssistedDeposit(ArmSubsystem a, WristSubsystem w, ElapsedTime timer) {
+    public DriverAssistedAutoTargetedDeposit(ArmSubsystem a, WristSubsystem w, ElapsedTime timer) {
         arm = a;
         wrist = w;
         addRequirements(a);
@@ -35,11 +36,16 @@ public class DriverAssistedDeposit extends CommandBase {
          * the arm and center for the wrist).
          */
         this.startMillis = (long) timer.milliseconds();
-        wrist.deposit();
+        arm.depositAutoTargeted();
+        wrist.ready();
     }
 
     @Override
     public void execute() {
+        if (waitToDeposit && ((long) timer.milliseconds()) - startMillis >= armTravelWaitTime) {
+            wrist.deposit();
+            waitToDeposit = false;
+        }
         if (waitToRetract && ((long) timer.milliseconds()) - startMillis >= depositWaitTime) {
             wrist.center();
             arm.center();
