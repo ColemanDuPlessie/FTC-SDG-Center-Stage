@@ -52,27 +52,26 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
     }
 
     Mat YCrCb = new Mat();
-    Mat flipped = new Mat();
 
     private final boolean isBlue;
 
     private PROP_POSITION currentPos = PROP_POSITION.CENTER;
     private double currentConfidence = 1.0;
 
-    public static double minControlExcedance = 12;
+    public static double minControlExcedance = 11;
 
-    int leftX = 25;
-    int leftY = 165;
+    int leftX = 20;
+    int leftY = 168;
     int centerX = 190;
     int centerY = 158;
     int controlX = 105;
-    int controlY = 180;
-    int leftW = 25;
-    int leftH = 35;
+    int controlY = 210;
+    int leftW = 20;
+    int leftH = 32;
     int centerW = 30;
     int centerH = 20;
     int controlW = 32;
-    int controlH = 32;
+    int controlH = 30;
 
     double targetW = 320; // Height calculated based on assumed 3:4 aspect ratio. Other constants scaled as necessary for resolution.
 
@@ -116,8 +115,7 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
     @Override
     public Mat processFrame(Mat input, long captureTimeNanos)
     {
-        Core.rotate(input, flipped, Core.ROTATE_180);
-        Imgproc.cvtColor(flipped, YCrCb, Imgproc.COLOR_RGB2YCrCb);
+        Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
 
         Rect leftCrop = new Rect(leftX, leftY, leftW, leftH);
         Rect centerCrop = new Rect(centerX, centerY, centerW, centerH);
@@ -149,8 +147,8 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
             currentPos = PROP_POSITION.RIGHT;
         }
 
-        Bitmap b = Bitmap.createBitmap(flipped.width(), flipped.height(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(flipped, b);
+        Bitmap b = Bitmap.createBitmap(input.width(), input.height(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(input, b);
         lastFrame.set(b);
 
         return YCrCb;
