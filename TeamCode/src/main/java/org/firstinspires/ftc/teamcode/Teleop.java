@@ -150,7 +150,7 @@ public class Teleop extends CommandbasedOpmode {
             ((ArmAwareSetSlides) scheduler.requiring(robot.slides)).debug(telemetry);
         }
         for (AprilTagDetection det:robot.camera.getRawTagDetections()) {
-            if (det == null) {continue;}
+            if (det == null || det.ftcPose == null) {continue;}
             telemetry.addLine();
             telemetry.addLine(String.format("April tag with id #%d detected at the following coordinates:", det.id));
             telemetry.addData("X", det.ftcPose.x);
