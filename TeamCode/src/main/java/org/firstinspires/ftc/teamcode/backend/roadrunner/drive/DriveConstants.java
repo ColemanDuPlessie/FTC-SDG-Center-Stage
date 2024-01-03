@@ -34,8 +34,8 @@ public class DriveConstants {
      * from DriveVelocityPIDTuner.
      */
     public static final boolean RUN_USING_ENCODER = true;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(23, 0, 3,
-      13.25); // f is higher (~17) with low battery and lower (~13.25) with high battery
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(22, 0, 3,
+      14); // f is higher (~17) with low battery and lower (~13.25) with high battery
 
     /*
      * These are physical constants that can be determined from your robot (including the track
@@ -89,7 +89,7 @@ public class DriveConstants {
      */
     public static double MAX_VEL = 45; // Previously 65, or 51 with a low battery
     public static double MAX_ACCEL = 40; // Previously 65.6
-    public static double MAX_ANG_VEL = 23.8;
+    public static double MAX_ANG_VEL = 5.14; // Previously 23.8!?
     public static double MAX_ANG_ACCEL = Math.toRadians(341.7102);
 
 
