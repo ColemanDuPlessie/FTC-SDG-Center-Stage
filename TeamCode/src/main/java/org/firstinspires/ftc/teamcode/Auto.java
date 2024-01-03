@@ -31,10 +31,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.command.Command;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.backend.CommandbasedOpmode;
+import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareSetSlides;
+import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedAutoTargetedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.FollowRRTraj;
 import org.firstinspires.ftc.teamcode.backend.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.backend.roadrunner.trajectorysequence.TrajectorySequence;
@@ -49,13 +52,18 @@ import org.firstinspires.ftc.teamcode.backend.roadrunner.trajectorysequence.Traj
 public class Auto extends CommandbasedOpmode {
 
     SampleMecanumDrive drive;
-    TrajectorySequence prepPark;
+    TrajectorySequence traj;
 
-    public double STARTX = 12;
-    public double STARTY = 63;
-    public double STARTTHETA = 90;
-    public double PARKX = 56;
-    public double PARKY = 54;
+    public static double STARTX = 63;
+    public static double STARTYOFFSET = 1.75;
+    public static double STARTY = 12;
+    public static double STARTTHETA = 0;
+    public static double DEPOSITX = 36;
+    public static double DEPOSITY = 48;
+    public static double DEPOSITXOFFSET = 6;
+    public static double DEPOSITTHETA = Math.toRadians(-90);
+    public static double PARKX = 60;
+    public static double PARKY = 60;
 
 
     private Command prepParkCommand;
@@ -66,24 +74,36 @@ public class Auto extends CommandbasedOpmode {
     public void init() {
         robot.init(hardwareMap, false);
 
-        if (SetDrivingStyle.startOnRight) {
-            PARKX = 2*STARTX-PARKX;
+        if (SetDrivingStyle.isBlue) {
+            STARTY -= STARTYOFFSET;
+            STARTX *= -1;
+            STARTTHETA += Math.toRadians(180);
+            DEPOSITX *= -1;
+            PARKX *= -1;
+        } else {
+            STARTY += STARTYOFFSET;
         }
 
         startHeading = robot.drivetrain.getHeading();
 
-        Pose2d startPose = new Pose2d(STARTX, STARTY, Math.toRadians(STARTTHETA));
+        Pose2d startPose = new Pose2d(STARTX, STARTY, STARTTHETA);
 
         drive = new SampleMecanumDrive(hardwareMap);
         drive.setPoseEstimate(startPose);
 
-        Pose2d prepParkPose = new Pose2d(PARKX, PARKY, Math.toRadians(STARTTHETA));
+        Pose2d depositPose = new Pose2d(DEPOSITX, DEPOSITY, DEPOSITTHETA);
+        Vector2d preParkPose = new Vector2d((DEPOSITX+PARKX)/2, DEPOSITY);
+        Vector2d parkPose = new Vector2d(PARKX, PARKY);
 
-        prepPark = drive.trajectorySequenceBuilder(startPose)
-                .lineToLinearHeading(prepParkPose)
+        traj = drive.trajectorySequenceBuilder(startPose)
+                .addTemporalMarker(0.5, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
+                .splineToSplineHeading(depositPose, DEPOSITTHETA)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
+                .waitSeconds(2)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                .splineToConstantHeading(preParkPose, DEPOSITTHETA)
+                .splineToConstantHeading(parkPose, DEPOSITTHETA)
                 .build();
-
-        prepParkCommand = new FollowRRTraj(robot.drivetrain, drive, prepPark);
     }
 
     /*
@@ -102,9 +122,8 @@ public class Auto extends CommandbasedOpmode {
     @Override
     public void start() {
         robot.camera.propDetected();
-        FollowRRTraj forward = new FollowRRTraj(robot.drivetrain, drive, prepPark);
-        Command park;
-        scheduler.schedule(false, forward);
+        FollowRRTraj auto = new FollowRRTraj(robot.drivetrain, drive, traj);
+        scheduler.schedule(false, auto);
     }
 
     /*
