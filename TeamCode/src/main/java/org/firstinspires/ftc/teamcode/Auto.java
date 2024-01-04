@@ -57,14 +57,19 @@ import java.util.ArrayList;
 public class Auto extends CommandbasedOpmode {
 
     SampleMecanumDrive drive;
-    TrajectorySequence prepDepositTraj;
+
     TrajectorySequence startLTraj;
     TrajectorySequence startCTraj;
     TrajectorySequence startRTraj;
 
+    TrajectorySequence prepDepositTraj;
+
     TrajectorySequence depositLTraj;
     TrajectorySequence depositCTraj;
     TrajectorySequence depositRTraj;
+
+
+    TrajectorySequence parkTraj;
 
     private static final double REVERSE = Math.toRadians(180);
 
@@ -74,7 +79,7 @@ public class Auto extends CommandbasedOpmode {
     public static double PREDEPOSITX = 32;
     public static double PREDEPOSITY = -36;
     public static double PREDEPOSITTHETA = REVERSE;
-    public static double DEPOSITX = 51;
+    public static double DEPOSITX = 52;
     public static double DEPOSITY = -36;
     public static double DEPOSITYOFFSET = 6;
     public static double DEPOSITTHETA = REVERSE;
@@ -103,14 +108,13 @@ public class Auto extends CommandbasedOpmode {
         drive.setPoseEstimate(startPose);
 
         Pose2d depositPose = new Pose2d(DEPOSITX, DEPOSITY, DEPOSITTHETA);
-        Vector2d preParkPose = new Vector2d((DEPOSITX+PARKX)/2, DEPOSITY);
+        Vector2d preParkPose = new Vector2d(DEPOSITX-3, (DEPOSITY+PARKY)/2);
         Vector2d parkPose = new Vector2d(PARKX, PARKY);
-
-        Command prepDeposit = new SequentialCommandGroup(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer), new WaitCommand(1500), new ReadyArmCarefully(robot.arm, robot.wrist, timer));
 
         prepDepositTraj = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(true)
-                .addTemporalMarker(1.5, () -> scheduler.schedule(prepDeposit))
+                .addTemporalMarker(0.5, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
+                .addTemporalMarker(3.5, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
                 .splineToSplineHeading(depositPose, DEPOSITTHETA+REVERSE)
                 // .splineToConstantHeading(preParkPose, DEPOSITTHETA)
                 // .splineToConstantHeading(parkPose, DEPOSITTHETA)
@@ -135,6 +139,11 @@ public class Auto extends CommandbasedOpmode {
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
                 .strafeRight(DEPOSITYOFFSET)
                 .build();
+
+        parkTraj = drive.trajectorySequenceBuilder(depositPose)
+                .splineToConstantHeading(preParkPose, STARTTHETA)
+                .splineToConstantHeading(parkPose, DEPOSITTHETA+REVERSE)
+                .build();
     }
 
     /*
@@ -153,9 +162,8 @@ public class Auto extends CommandbasedOpmode {
     @Override
     public void start() {
         robot.camera.propDetected();
-        FollowRRTraj prepDeposit = new FollowRRTraj(robot.drivetrain, drive, prepDepositTraj);
         ArrayList<Command> auto = new ArrayList<>();
-        auto.add(prepDeposit);
+        auto.add(new FollowRRTraj(robot.drivetrain, drive, prepDepositTraj));
         // TODO auto.add(TODO);
         switch (robot.camera.getPropPosition()) {
             case LEFT:
@@ -168,6 +176,7 @@ public class Auto extends CommandbasedOpmode {
                 auto.add(new FollowRRTraj(robot.drivetrain, drive, depositRTraj));
                 break;
         }
+        auto.add(new FollowRRTraj(robot.drivetrain, drive, parkTraj));
         scheduler.schedule(false, new SequentialCommandGroup(auto.toArray(new Command[0])));
     }
 
