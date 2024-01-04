@@ -89,8 +89,8 @@ public class DriveConstants {
      */
     public static double MAX_VEL = 22.5; // Previously 65, or 51 with a low battery. Ideal max: 45
     public static double MAX_ACCEL = 20; // Previously 65.6. Ideal max: 40
-    public static double MAX_ANG_VEL = 5.14; // Previously 23.8!?
-    public static double MAX_ANG_ACCEL = Math.toRadians(341.7102);
+    public static double MAX_ANG_VEL = 3; // Previously 23.8!? Ideal max: 5.14
+    public static double MAX_ANG_ACCEL = 3.5; // Ideal max: around 6?
 
 
     public static double encoderTicksToInches(double ticks) {

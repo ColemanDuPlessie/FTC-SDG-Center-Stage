@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 public class DriverAssistedAutoTargetedDeposit extends CommandBase {
 
     public static long armTravelWaitTime = 500;
-    public static long depositWaitTime = 2000; // Counting from 0, not from the previous event
+    public static long depositWaitTime = 1500; // Counting from 0, not from the previous event
 
     private ElapsedTime timer;
     private long startMillis;
