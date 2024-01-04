@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.backend.CommandbasedOpmode;
 import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareSetSlides;
+import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedAutoTargetedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.FollowRRTraj;
 import org.firstinspires.ftc.teamcode.backend.commands.ReadyArmCarefully;
@@ -79,9 +80,9 @@ public class Auto extends CommandbasedOpmode {
     public static double PREDEPOSITX = 32;
     public static double PREDEPOSITY = -36;
     public static double PREDEPOSITTHETA = REVERSE;
-    public static double DEPOSITX = 52;
+    public static double DEPOSITX = 51;
     public static double DEPOSITY = -36;
-    public static double DEPOSITYOFFSET = 6;
+    public static double DEPOSITYOFFSET = 7; // The actual pitch is 6 in, but we want to err on the side of correctness
     public static double DEPOSITYSIDEBASEDOFFSET = 1.5;
     public static double DEPOSITTHETA = REVERSE;
     public static double PARKX = 60;
@@ -116,7 +117,9 @@ public class Auto extends CommandbasedOpmode {
         prepDepositTraj = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(true)
                 .addTemporalMarker(0.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
-                .addTemporalMarker(4.0, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
+                .addTemporalMarker(2.5, () -> robot.slides.setTargetPosition(0.0))
+                .addTemporalMarker(3.0, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
+                .waitSeconds(1.5)
                 .splineToSplineHeading(depositPose, DEPOSITTHETA+REVERSE)
                 // .splineToConstantHeading(preParkPose, DEPOSITTHETA)
                 // .splineToConstantHeading(parkPose, DEPOSITTHETA)
@@ -124,21 +127,25 @@ public class Auto extends CommandbasedOpmode {
 
         depositLTraj = drive.trajectorySequenceBuilder(depositPose)
                 .strafeRight(DEPOSITYOFFSET)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedDeposit(robot.arm, robot.wrist, timer)))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
                 .waitSeconds(2)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
                 .strafeLeft(DEPOSITYOFFSET)
                 .build();
         depositCTraj = drive.trajectorySequenceBuilder(depositPose)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedDeposit(robot.arm, robot.wrist, timer)))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
                 .waitSeconds(2)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                .waitSeconds(1.25)
                 .build();
         depositRTraj = drive.trajectorySequenceBuilder(depositPose)
                 .strafeLeft(DEPOSITYOFFSET)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedDeposit(robot.arm, robot.wrist, timer)))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
                 .waitSeconds(2)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
                 .strafeRight(DEPOSITYOFFSET)
                 .build();
 
