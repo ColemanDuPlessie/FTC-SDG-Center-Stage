@@ -20,8 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AprilTagProcessorWithDash extends AprilTagProcessorImpl implements CameraStreamSource {
 
-    private Mat flipped = new Mat();
-
     private final AtomicReference<Bitmap> lastFrame =
             new AtomicReference<>(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
 
@@ -40,11 +38,10 @@ public class AprilTagProcessorWithDash extends AprilTagProcessorImpl implements 
     }
 
     public Object processFrame(Mat input, long captureTimeNanos) {
-        Core.rotate(input, flipped, Core.ROTATE_180);
-        Bitmap b = Bitmap.createBitmap(flipped.width(), flipped.height(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(flipped, b);
+        Bitmap b = Bitmap.createBitmap(input.width(), input.height(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(input, b);
         lastFrame.set(b);
-        return super.processFrame(flipped, captureTimeNanos);
+        return super.processFrame(input, captureTimeNanos);
     }
 
     public static class Builder {

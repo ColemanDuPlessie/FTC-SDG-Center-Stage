@@ -12,7 +12,7 @@ public class PurplePixelSubsystem extends SubsystemBase {
     public ServoImpl servo;
 
     public static double waitingPosition = 0.50;
-    public static double activePosition = 0.10;
+    public static double activePosition = 0.18;
 
     private double targetPosition = waitingPosition;
 

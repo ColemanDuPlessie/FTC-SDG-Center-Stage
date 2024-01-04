@@ -14,7 +14,9 @@ import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 public class ArmAwareSetSlides extends CommandBase {
 
     public static double changeoverPosition = 0.25;
-    public static long armTravelWaitTime = 500;
+    public static long minArmTravelWaitTime = -1000;
+    public static long maxArmTravelWaitTime = 1250;
+    private long armTravelWaitTime;
 
     private ElapsedTime timer;
     private double targetPos;
@@ -56,6 +58,7 @@ public class ArmAwareSetSlides extends CommandBase {
     @Override
     public void initialize() {
         this.startMillis = (long) timer.milliseconds();
+        armTravelWaitTime = (long)(minArmTravelWaitTime + (maxArmTravelWaitTime-minArmTravelWaitTime)*(1-(slides.getPosition()-changeoverPosition)/(1-changeoverPosition)));
         double startPos = slides.getPosition();
         if (startPos < changeoverPosition && targetPos > changeoverPosition) {
             arm.holding();
