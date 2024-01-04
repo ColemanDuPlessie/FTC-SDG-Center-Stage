@@ -5,7 +5,7 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.Robot;
 import com.arcrobotics.ftclib.command.Subsystem;
-import com.outoftheboxrobotics.photoncore.Photon;
+// TODO import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -15,7 +15,6 @@ import org.firstinspires.ftc.teamcode.backend.utilities.GamepadWrapper;
 
 import java.util.List;
 
-@Photon
 public abstract class CommandbasedOpmode extends OpMode {
 
     /**
