@@ -58,20 +58,20 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
     private PROP_POSITION currentPos = PROP_POSITION.CENTER;
     private double currentConfidence = 1.0;
 
-    public static double minControlExcedance = 11;
+    public static double minControlExcedance = 20;
 
-    int leftX = 20;
-    int leftY = 168;
-    int centerX = 190;
-    int centerY = 158;
-    int controlX = 105;
-    int controlY = 210;
-    int leftW = 20;
-    int leftH = 32;
-    int centerW = 30;
-    int centerH = 20;
-    int controlW = 32;
-    int controlH = 30;
+    public static int rightX = 295;
+    public static int rightY = 168;
+    public static int centerX = 130;
+    public static int centerY = 165;
+    public static int controlX = 210;
+    public static int controlY = 215;
+    public static int rightW = 25;
+    public static int rightH = 32;
+    public static int centerW = 30;
+    public static int centerH = 20;
+    public static int controlW = 32;
+    public static int controlH = 25;
 
     double targetW = 320; // Height calculated based on assumed 3:4 aspect ratio. Other constants scaled as necessary for resolution.
 
@@ -97,10 +97,10 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
     {
         assert height/width == 3/4; // TODO this should be more elegant
         double scale = width/targetW;
-        leftX *= scale;
-        leftY *= scale;
-        leftW *= scale;
-        leftH *= scale;
+        rightX *= scale;
+        rightY *= scale;
+        rightW *= scale;
+        rightH *= scale;
         controlX *= scale;
         controlY *= scale;
         controlW *= scale;
@@ -117,34 +117,34 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
     {
         Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
 
-        Rect leftCrop = new Rect(leftX, leftY, leftW, leftH);
+        Rect rightCrop = new Rect(rightX, rightY, rightW, rightH);
         Rect centerCrop = new Rect(centerX, centerY, centerW, centerH);
         Rect controlCrop = new Rect(controlX, controlY, controlW, controlH);
 
-        Mat left = new Mat(YCrCb, leftCrop); // TODO this may be inefficient?
+        Mat right = new Mat(YCrCb, rightCrop); // TODO this may be inefficient?
         Mat center = new Mat(YCrCb, centerCrop);
         Mat control = new Mat(YCrCb, controlCrop);
 
-        double leftDetectionValue = processArea(left);
+        double rightDetectionValue = processArea(right);
         double centerDetectionValue = processArea(center);
         double controlDetectionValue = processArea(control);
         if (t != null) {
-            t.addData("left", leftDetectionValue);
+            t.addData("right", rightDetectionValue);
             t.addData("center", centerDetectionValue);
             t.addData("control", controlDetectionValue);
         }
 
-        double leftConfidence = leftDetectionValue-controlDetectionValue;
+        double rightConfidence = rightDetectionValue-controlDetectionValue;
         double centerConfidence = centerDetectionValue-controlDetectionValue;
-        if (leftConfidence > minControlExcedance) {
-            currentConfidence = leftConfidence-minControlExcedance;
-            currentPos = PROP_POSITION.LEFT;
+        if (rightConfidence > minControlExcedance) {
+            currentConfidence = rightConfidence-minControlExcedance;
+            currentPos = PROP_POSITION.RIGHT;
         } else if (centerConfidence > minControlExcedance) {
             currentConfidence = centerConfidence-minControlExcedance;
             currentPos = PROP_POSITION.CENTER;
         } else {
-            currentConfidence = minControlExcedance-Math.max(centerConfidence, leftConfidence);
-            currentPos = PROP_POSITION.RIGHT;
+            currentConfidence = minControlExcedance-Math.max(centerConfidence, rightConfidence);
+            currentPos = PROP_POSITION.LEFT;
         }
 
         Bitmap b = Bitmap.createBitmap(input.width(), input.height(), Bitmap.Config.RGB_565);
@@ -176,9 +176,9 @@ public class TeamPropProcessor implements VisionProcessor, CameraStreamSource {
             Paint lColor = currentPos == PROP_POSITION.LEFT ? detectPaint : noDetectPaint;
             Paint cColor = currentPos == PROP_POSITION.CENTER ? detectPaint : noDetectPaint;
             Paint rColor = currentPos == PROP_POSITION.RIGHT ? detectPaint : noDetectPaint;
-            canvas.drawRect(onscreenWidth-(leftX+leftW)*scaleBmpPxToCanvasPx, onscreenHeight-(leftY+leftH)*scaleBmpPxToCanvasPx,onscreenWidth-(leftX-leftW)*scaleBmpPxToCanvasPx, onscreenHeight-(leftY-leftH)*scaleBmpPxToCanvasPx,  lColor);
-            canvas.drawRect(onscreenWidth-(centerX+centerW)*scaleBmpPxToCanvasPx, onscreenHeight-(centerY+centerH)*scaleBmpPxToCanvasPx,onscreenWidth-(centerX-centerW)*scaleBmpPxToCanvasPx, onscreenHeight-(centerY-centerH)*scaleBmpPxToCanvasPx,  cColor);
-            canvas.drawRect(onscreenWidth-(controlX + controlW)*scaleBmpPxToCanvasPx, onscreenHeight-(controlY + controlH)*scaleBmpPxToCanvasPx,onscreenWidth-(controlX - controlW)*scaleBmpPxToCanvasPx, onscreenHeight-(controlY - controlH)*scaleBmpPxToCanvasPx,  rColor);
+            canvas.drawRect((rightX - rightW)*scaleBmpPxToCanvasPx, (rightY - rightH)*scaleBmpPxToCanvasPx, (rightX + rightW)*scaleBmpPxToCanvasPx, (rightY + rightH)*scaleBmpPxToCanvasPx, rColor);
+            canvas.drawRect((centerX-centerW)*scaleBmpPxToCanvasPx, (centerY-centerH)*scaleBmpPxToCanvasPx, (centerX+centerW)*scaleBmpPxToCanvasPx, (centerY+centerH)*scaleBmpPxToCanvasPx, cColor);
+            canvas.drawRect((controlX - controlW)*scaleBmpPxToCanvasPx, (controlY - controlH)*scaleBmpPxToCanvasPx,(controlX + controlW)*scaleBmpPxToCanvasPx, (controlY + controlH)*scaleBmpPxToCanvasPx,  lColor);
         }
     }
 
