@@ -82,6 +82,7 @@ public class Auto extends CommandbasedOpmode {
     public static double DEPOSITX = 52;
     public static double DEPOSITY = -36;
     public static double DEPOSITYOFFSET = 6;
+    public static double DEPOSITYSIDEBASEDOFFSET = 1.5;
     public static double DEPOSITTHETA = REVERSE;
     public static double PARKX = 60;
     public static double PARKY = -60;
@@ -99,6 +100,7 @@ public class Auto extends CommandbasedOpmode {
             DEPOSITY *= -1;
             PARKY *= -1;
         }
+        DEPOSITY += DEPOSITYSIDEBASEDOFFSET;
 
         startHeading = robot.drivetrain.getHeading();
 
@@ -113,8 +115,8 @@ public class Auto extends CommandbasedOpmode {
 
         prepDepositTraj = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(true)
-                .addTemporalMarker(0.5, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
-                .addTemporalMarker(3.5, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
+                .addTemporalMarker(0.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
+                .addTemporalMarker(4.0, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
                 .splineToSplineHeading(depositPose, DEPOSITTHETA+REVERSE)
                 // .splineToConstantHeading(preParkPose, DEPOSITTHETA)
                 // .splineToConstantHeading(parkPose, DEPOSITTHETA)
