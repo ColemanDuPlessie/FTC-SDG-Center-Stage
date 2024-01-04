@@ -40,6 +40,7 @@ import org.firstinspires.ftc.teamcode.backend.CommandbasedOpmode;
 import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareSetSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.FollowRRTraj;
+import org.firstinspires.ftc.teamcode.backend.commands.ReadyArmCarefully;
 import org.firstinspires.ftc.teamcode.backend.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.backend.roadrunner.trajectorysequence.TrajectorySequence;
 
@@ -104,9 +105,11 @@ public class Auto extends CommandbasedOpmode {
         Vector2d preParkPose = new Vector2d((DEPOSITX+PARKX)/2, DEPOSITY);
         Vector2d parkPose = new Vector2d(PARKX, PARKY);
 
+        Command prepDeposit = new SequentialCommandGroup(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer), new ReadyArmCarefully(robot.arm, robot.wrist, timer));
+
         depositParkTraj = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(true)
-                .addTemporalMarker(0.5, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
+                .addTemporalMarker(1.5, () -> scheduler.schedule(prepDeposit))
                 .splineToSplineHeading(depositPose, DEPOSITTHETA+REVERSE)
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedDeposit(robot.arm, robot.wrist, timer)))
                 .waitSeconds(3.5)
