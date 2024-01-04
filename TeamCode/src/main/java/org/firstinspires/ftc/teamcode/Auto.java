@@ -30,20 +30,19 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.SetDrivingStyle.isBlue;
+import static org.firstinspires.ftc.teamcode.SetDrivingStyle.startAudienceSide;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.apache.commons.math3.util.MathUtils;
 import org.firstinspires.ftc.teamcode.backend.CommandbasedOpmode;
 import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareSetSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedAutoTargetedDeposit;
-import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.FollowRRTraj;
 import org.firstinspires.ftc.teamcode.backend.commands.ReadyArmCarefully;
 import org.firstinspires.ftc.teamcode.backend.roadrunner.drive.SampleMecanumDrive;
@@ -59,6 +58,8 @@ import java.util.ArrayList;
 @Autonomous(name="Auto (THIS ONE)")
 @Config
 public class Auto extends CommandbasedOpmode {
+
+    boolean actingAsBlue;
 
     SampleMecanumDrive drive;
 
@@ -103,9 +104,11 @@ public class Auto extends CommandbasedOpmode {
     public void init() {
         robot.init(hardwareMap, false);
 
+        actingAsBlue = isBlue ^ startAudienceSide;
+
         double CPURPLEDEPOSITX = STARTX;
 
-        if (isBlue) {
+        if (actingAsBlue) {
             STARTY *= -1;
             STARTTHETA -= REVERSE;
             CPURPLEDEPOSITY *= -1;
@@ -132,7 +135,7 @@ public class Auto extends CommandbasedOpmode {
         Vector2d preParkPose = new Vector2d(DEPOSITX-4, (DEPOSITY+PARKY)/2);
         Vector2d parkPose = new Vector2d(PARKX, PARKY);
 
-        double LFirstXPos = isBlue ? STARTX*0.7+(LRPURPLEDEPOSITX-LRPURPLEDEPOSITXOFFSET)*0.3 : STARTX;
+        double LFirstXPos = actingAsBlue ? STARTX*0.7+(LRPURPLEDEPOSITX-LRPURPLEDEPOSITXOFFSET)*0.3 : STARTX;
 
         startLTraj = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(true)
@@ -159,7 +162,7 @@ public class Auto extends CommandbasedOpmode {
                 .splineToSplineHeading(preDepositPose, PREDEPOSITTHETA+REVERSE)
                 .build();
 
-        if (isBlue) {
+        if (actingAsBlue) {
             startRTraj = drive.trajectorySequenceBuilder(startPose)
                     .setReversed(true)
                     .lineToConstantHeading(new Vector2d(STARTX, LRPURPLEDEPOSITY-LRPURPLEDEPOSITYOFFSET))
@@ -184,43 +187,45 @@ public class Auto extends CommandbasedOpmode {
                     .build();
         }
 
-        prepDepositTraj = drive.trajectorySequenceBuilder(preDepositPose)
-                .setReversed(true)
-                .addTemporalMarker(0.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
-                .addTemporalMarker(1.0, () -> robot.slides.setTargetPosition(0.0))
-                .addTemporalMarker(1.5, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
-                .waitSeconds(1.0)
-                .splineToSplineHeading(depositPose, DEPOSITTHETA+REVERSE)
-                .build();
+        if (!startAudienceSide) {
+            prepDepositTraj = drive.trajectorySequenceBuilder(preDepositPose)
+                    .setReversed(true)
+                    .addTemporalMarker(0.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
+                    .addTemporalMarker(1.0, () -> robot.slides.setTargetPosition(0.0))
+                    .addTemporalMarker(1.5, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
+                    .waitSeconds(1.0)
+                    .splineToSplineHeading(depositPose, DEPOSITTHETA + REVERSE)
+                    .build();
 
-        depositLTraj = drive.trajectorySequenceBuilder(depositPose)
-                .strafeRight(DEPOSITYOFFSET-1.5)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
-                .waitSeconds(2)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
-                .strafeLeft(DEPOSITYOFFSET-1.5)
-                .build();
-        depositCTraj = drive.trajectorySequenceBuilder(depositPose)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
-                .waitSeconds(2)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
-                .waitSeconds(1.25)
-                .build();
-        depositRTraj = drive.trajectorySequenceBuilder(depositPose)
-                .strafeLeft(DEPOSITYOFFSET)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
-                .waitSeconds(2)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
-                .strafeRight(DEPOSITYOFFSET)
-                .build();
+            depositLTraj = drive.trajectorySequenceBuilder(depositPose)
+                    .strafeRight(DEPOSITYOFFSET - 1.5)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
+                    .waitSeconds(2)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                    .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                    .strafeLeft(DEPOSITYOFFSET - 1.5)
+                    .build();
+            depositCTraj = drive.trajectorySequenceBuilder(depositPose)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
+                    .waitSeconds(2)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                    .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                    .waitSeconds(1.25)
+                    .build();
+            depositRTraj = drive.trajectorySequenceBuilder(depositPose)
+                    .strafeLeft(DEPOSITYOFFSET)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
+                    .waitSeconds(2)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                    .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                    .strafeRight(DEPOSITYOFFSET)
+                    .build();
 
-        parkTraj = drive.trajectorySequenceBuilder(depositPose)
-                .splineToConstantHeading(preParkPose, STARTTHETA)
-                .splineToConstantHeading(parkPose, DEPOSITTHETA+REVERSE)
-                .build();
+            parkTraj = drive.trajectorySequenceBuilder(depositPose)
+                    .splineToConstantHeading(preParkPose, STARTTHETA)
+                    .splineToConstantHeading(parkPose, DEPOSITTHETA + REVERSE)
+                    .build();
+        }
     }
 
     /*
@@ -256,9 +261,11 @@ public class Auto extends CommandbasedOpmode {
                 deposit = new FollowRRTraj(robot.drivetrain, drive, depositCTraj);
                 break;
         }
-        auto.add(new FollowRRTraj(robot.drivetrain, drive, prepDepositTraj));
-        auto.add(deposit);
-        auto.add(new FollowRRTraj(robot.drivetrain, drive, parkTraj));
+        if (!startAudienceSide) {
+            auto.add(new FollowRRTraj(robot.drivetrain, drive, prepDepositTraj));
+            auto.add(deposit);
+            auto.add(new FollowRRTraj(robot.drivetrain, drive, parkTraj));
+        }
         scheduler.schedule(false, new SequentialCommandGroup(auto.toArray(new Command[0])));
     }
 
