@@ -37,6 +37,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.apache.commons.math3.util.MathUtils;
 import org.firstinspires.ftc.teamcode.backend.CommandbasedOpmode;
 import org.firstinspires.ftc.teamcode.backend.commands.ArmAwareSetSlides;
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedAutoTargetedDeposit;
@@ -77,6 +78,7 @@ public class Auto extends CommandbasedOpmode {
     public static double STARTX = 12;
     public static double STARTY = -63;
     public static double STARTTHETA = Math.toRadians(-90);
+    public static double CPURPLEDEPOSITY = -31.5;
     public static double PREDEPOSITX = 32;
     public static double PREDEPOSITY = -36;
     public static double PREDEPOSITTHETA = REVERSE;
@@ -94,12 +96,17 @@ public class Auto extends CommandbasedOpmode {
     public void init() {
         robot.init(hardwareMap, false);
 
+        double CPURPLEDEPOSITX = STARTX;
+
         if (SetDrivingStyle.isBlue) {
             STARTY *= -1;
             STARTTHETA -= Math.toRadians(180);
+            CPURPLEDEPOSITY *= -1;
             PREDEPOSITY *= -1;
             DEPOSITY *= -1;
             PARKY *= -1;
+            CPURPLEDEPOSITX += 3.0;
+
         }
         DEPOSITY += DEPOSITYSIDEBASEDOFFSET;
 
@@ -111,15 +118,30 @@ public class Auto extends CommandbasedOpmode {
         drive.setPoseEstimate(startPose);
 
         Pose2d depositPose = new Pose2d(DEPOSITX, DEPOSITY, DEPOSITTHETA);
-        Vector2d preParkPose = new Vector2d(DEPOSITX-3, (DEPOSITY+PARKY)/2);
+        Pose2d preDepositPose = new Pose2d(PREDEPOSITX, PREDEPOSITY, PREDEPOSITTHETA);
+        Vector2d preParkPose = new Vector2d(DEPOSITX-4, (DEPOSITY+PARKY)/2);
         Vector2d parkPose = new Vector2d(PARKX, PARKY);
 
-        prepDepositTraj = drive.trajectorySequenceBuilder(startPose)
+        startCTraj = drive.trajectorySequenceBuilder(startPose)
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(CPURPLEDEPOSITX*0.8+PREDEPOSITX*0.2, CPURPLEDEPOSITY*0.7+STARTY*0.3, DEPOSITTHETA+REVERSE), STARTTHETA+REVERSE)
+                .splineToSplineHeading(new Pose2d(CPURPLEDEPOSITX, CPURPLEDEPOSITY*1.1-STARTY*0.1, DEPOSITTHETA+REVERSE), STARTTHETA+REVERSE)
+                .setReversed(false)
+                .splineToConstantHeading(new Vector2d(CPURPLEDEPOSITX, CPURPLEDEPOSITY), STARTTHETA)
+                .turn(MathUtils.normalizeAngle(STARTTHETA-(DEPOSITTHETA-REVERSE), 0.0))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.purplePixel.activate())
+                .waitSeconds(0.75)
+                .splineToConstantHeading(new Vector2d(CPURPLEDEPOSITX, (CPURPLEDEPOSITY+STARTY)/2), STARTTHETA)
+                .setReversed(true)
+                .splineToSplineHeading(preDepositPose, PREDEPOSITTHETA+REVERSE)
+                .build();
+
+        prepDepositTraj = drive.trajectorySequenceBuilder(preDepositPose)
                 .setReversed(true)
                 .addTemporalMarker(0.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
-                .addTemporalMarker(2.5, () -> robot.slides.setTargetPosition(0.0))
-                .addTemporalMarker(3.0, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
-                .waitSeconds(1.5)
+                .addTemporalMarker(1.0, () -> robot.slides.setTargetPosition(0.0))
+                .addTemporalMarker(1.5, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
+                .waitSeconds(1.0)
                 .splineToSplineHeading(depositPose, DEPOSITTHETA+REVERSE)
                 // .splineToConstantHeading(preParkPose, DEPOSITTHETA)
                 // .splineToConstantHeading(parkPose, DEPOSITTHETA)
@@ -172,8 +194,8 @@ public class Auto extends CommandbasedOpmode {
     public void start() {
         robot.camera.propDetected();
         ArrayList<Command> auto = new ArrayList<>();
+        auto.add(new FollowRRTraj(robot.drivetrain, drive, startCTraj)); // TODO L&R
         auto.add(new FollowRRTraj(robot.drivetrain, drive, prepDepositTraj));
-        // TODO auto.add(TODO);
         switch (robot.camera.getPropPosition()) {
             case LEFT:
                 auto.add(new FollowRRTraj(robot.drivetrain, drive, depositLTraj));
