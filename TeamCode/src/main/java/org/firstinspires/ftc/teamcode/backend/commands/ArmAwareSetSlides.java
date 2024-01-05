@@ -15,7 +15,7 @@ public class ArmAwareSetSlides extends CommandBase {
 
     public static double changeoverPosition = 0.25;
     public static long minArmTravelWaitTime = -1000;
-    public static long maxArmTravelWaitTime = 1250;
+    public static long maxArmTravelWaitTime = 750;
     private long armTravelWaitTime;
 
     private ElapsedTime timer;

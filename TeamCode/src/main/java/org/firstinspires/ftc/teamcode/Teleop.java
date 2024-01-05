@@ -81,9 +81,9 @@ public class Teleop extends CommandbasedOpmode {
 
     private void xPressed() {
         if (pad1.getY()) {
-            scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer));
+            scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer, robot.slides, robot.intake));
         } else if (robot.wrist.getTargetPosition() == WristSubsystem.readyPosition) {
-            scheduler.schedule(new DriverAssistedDeposit(robot.arm, robot.wrist, timer));
+            scheduler.schedule(new DriverAssistedDeposit(robot.arm, robot.wrist, timer, robot.slides, robot.intake));
         } else {
             toggleArm();
         }
@@ -111,6 +111,9 @@ public class Teleop extends CommandbasedOpmode {
         scheduler.setDefaultCommand(robot.drivetrain, new DriveFromGamepad(robot.drivetrain, pad1, SetDrivingStyle.isFieldCentric));
 
         GamepadEx gamepad = new GamepadEx(gamepad1);
+
+        gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
+                .whenReleased(robot.drone::activate);
 
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
                 .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake));

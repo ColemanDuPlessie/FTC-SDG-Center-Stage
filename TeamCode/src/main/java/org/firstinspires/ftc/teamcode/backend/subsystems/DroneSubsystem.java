@@ -11,8 +11,8 @@ public class DroneSubsystem extends SubsystemBase {
 
     public ServoImpl servo;
 
-    public static double waitingPosition = 0.24; // TODO
-    public static double activePosition = 0.70; // TODO
+    public static double waitingPosition = 0.50;
+    public static double activePosition = 0.70;
 
     private double targetPosition = waitingPosition;
 

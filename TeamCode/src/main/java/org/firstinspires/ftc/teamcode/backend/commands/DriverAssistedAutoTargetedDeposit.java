@@ -2,9 +2,15 @@ package org.firstinspires.ftc.teamcode.backend.commands;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.SetDrivingStyle;
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.SlidesSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 
 @Config
@@ -18,6 +24,9 @@ public class DriverAssistedAutoTargetedDeposit extends CommandBase {
     private ArmSubsystem arm;
     private WristSubsystem wrist;
 
+    private SlidesSubsystem s;
+    private IntakeSubsystem i;
+
     private boolean waitToDeposit = true;
     private boolean waitToRetract = true;
 
@@ -27,6 +36,12 @@ public class DriverAssistedAutoTargetedDeposit extends CommandBase {
         addRequirements(a);
         addRequirements(w);
         this.timer = timer;
+    }
+
+    public DriverAssistedAutoTargetedDeposit(ArmSubsystem a, WristSubsystem w, ElapsedTime timer, SlidesSubsystem s, IntakeSubsystem i) {
+        this(a, w, timer);
+        this.s = s;
+        this.i = i;
     }
 
     @Override
@@ -58,5 +73,8 @@ public class DriverAssistedAutoTargetedDeposit extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
+        if (SetDrivingStyle.depositAutoRetract && s != null && i != null) {
+            CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new WaitCommand(500), new ArmAwareSetSlides(s, arm, wrist, 0.0, timer, i)));
+        }
     }
 }

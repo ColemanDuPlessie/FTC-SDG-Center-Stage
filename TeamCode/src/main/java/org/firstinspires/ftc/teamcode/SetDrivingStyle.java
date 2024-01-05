@@ -42,16 +42,19 @@ import org.firstinspires.ftc.teamcode.backend.utilities.ToggleButton;
 @TeleOp(name="Set Driving Style", group="Set Driving Style")
 public class SetDrivingStyle extends CommandbasedOpmode {
 
+    ToggleButton aToggle;
     ToggleButton bToggle;
     ToggleButton xToggle;
     ToggleButton yToggle;
 
+    public static boolean depositAutoRetract = false;
     public static boolean startAudienceSide = false;
     public static boolean isFieldCentric   = false;
     public static boolean isBlue           = false;
 
     @Override
     public void init() {
+        aToggle = new ToggleButton(pad1::getA);
         bToggle = new ToggleButton(pad1::getB);
         xToggle = new ToggleButton(pad1::getX);
         yToggle = new ToggleButton(pad1::getY);
@@ -61,10 +64,12 @@ public class SetDrivingStyle extends CommandbasedOpmode {
 
     @Override
     public void init_loop() {
+        depositAutoRetract = aToggle.get();
         startAudienceSide = bToggle.get();
         isFieldCentric   = xToggle.get();
         isBlue           = yToggle.get();
 
+        telemetry.addData("Depositing automatically lowers slides?: (toggle with a)", depositAutoRetract);
         telemetry.addData("Auto Start Position: (toggle with b)", startAudienceSide ? "Audience Side (worse)" : "Backdrop Side (better)");
         telemetry.addData("Field Centric?: (toggle with x)", isFieldCentric);
         telemetry.addData("We are on the (toggle with y)", isBlue ? "Blue Alliance" : "Red Alliance");
