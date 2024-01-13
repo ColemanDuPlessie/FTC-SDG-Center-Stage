@@ -20,7 +20,8 @@ public class SlidesSubsystem extends SubsystemBase implements PositionControlled
     private PIDController PIDF;
 
     public static int minPosition = -60; // Added to ensure complete retraction
-    public static int maxPosition = 2650;
+    public static int maxPosition = 2650; // TODO this isn't all the way up for a hang
+    public static int hangPosition = 2800; // TODO
 
     public static double kP = 0.007; // TODO tune this
     public static double kI = 0.0000;
@@ -77,6 +78,8 @@ public class SlidesSubsystem extends SubsystemBase implements PositionControlled
         targetPosition += (int)(increment * (maxPosition-minPosition));
         targetPosition = Math.min(Math.max(targetPosition, minPosition), maxPosition);
     }
+
+    public void hang() {targetPosition = hangPosition;} // This is the only way to go above maxPosition.
 
     @Override
     public void periodic() {

@@ -112,6 +112,8 @@ public class Teleop extends CommandbasedOpmode {
 
         GamepadEx gamepad = new GamepadEx(gamepad1);
 
+        gamepad.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
+                .whenReleased(robot.slides::hang);
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
                 .whenReleased(robot.drone::activate);
 
