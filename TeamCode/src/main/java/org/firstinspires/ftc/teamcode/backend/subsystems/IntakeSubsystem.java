@@ -19,7 +19,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap) {
         motor = ahwMap.get(DcMotorImpl.class, "IntakeMotor");
-        motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        motor.setDirection(DcMotorSimple.Direction.FORWARD);
         motor.setPower(currentSpeed);
     }
 
