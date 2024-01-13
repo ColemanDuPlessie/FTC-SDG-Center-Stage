@@ -10,6 +10,8 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.SetDrivingStyle;
@@ -22,6 +24,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Config
 public class CameraSubsystem extends SubsystemBase {
@@ -70,6 +73,8 @@ public class CameraSubsystem extends SubsystemBase {
             visionPortal.setProcessorEnabled(propProcessor, true);
             FtcDashboard.getInstance().startCameraStream(propProcessor, 0);
         }
+
+        setManualExposure(6, 250); // TODO tune
 
     }
 
@@ -142,6 +147,16 @@ public class CameraSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+    }
+
+    public void setManualExposure(int exposureMS, int gain) {
+            ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
+            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
+                exposureControl.setMode(ExposureControl.Mode.Manual);
+            }
+            exposureControl.setExposure(exposureMS, TimeUnit.MILLISECONDS);
+            GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
+            gainControl.setGain(gain);
     }
 
 }
