@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.backend.utilities.controllers.PIDControlle
 public class SlidesSubsystem extends SubsystemBase implements PositionControlled {
 
     public DcMotor motor;
+    public DcMotor followerMotor;
 
     private PIDController PIDF;
 
@@ -35,6 +36,9 @@ public class SlidesSubsystem extends SubsystemBase implements PositionControlled
         motor = ahwMap.get(DcMotor.class, "SlidesMotor");
         motor.setDirection(DcMotorSimple.Direction.REVERSE);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        followerMotor = ahwMap.get(DcMotor.class, "SlidesFollowerMotor");
+        followerMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        followerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         startPosition = motor.getCurrentPosition();
         targetPosition = 0;
         PIDF = new PIDController(kP, kI, kD, aTimer);
@@ -44,6 +48,9 @@ public class SlidesSubsystem extends SubsystemBase implements PositionControlled
         motor = ahwMap.get(DcMotor.class, "SlidesMotor");
         motor.setDirection(DcMotorSimple.Direction.REVERSE);
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        followerMotor = ahwMap.get(DcMotor.class, "SlidesFollowerMotor");
+        followerMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        followerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (isTeleop) {
             Integer position = AutoToTeleopContainer.getInstance().getSlidesPosition();
             if (position == null) {
@@ -73,9 +80,9 @@ public class SlidesSubsystem extends SubsystemBase implements PositionControlled
 
     @Override
     public void periodic() {
-        int currentPosition = motor.getCurrentPosition();
         double actualPower = Math.min(maxPower, Math.max(PIDF.update(motor.getCurrentPosition()-startPosition, targetPosition) * maxPower, -maxPower)) + kG;
         motor.setPower(actualPower);
+        followerMotor.setPower(actualPower);
     }
 
 }
