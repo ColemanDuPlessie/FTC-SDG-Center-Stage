@@ -94,6 +94,10 @@ public class Teleop extends CommandbasedOpmode {
             if (robot.intake.getCurrentSpeed() == 0.0) {
                 scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer, isReversed));
                 return;
+            } else if ((robot.intake.getCurrentSpeed() > 0.0) == isReversed) {
+                robot.intake.setSpeed(0.0);
+                scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer, isReversed));
+                return;
             } else {
                 robot.arm.toggle();
                 robot.wrist.toggle();

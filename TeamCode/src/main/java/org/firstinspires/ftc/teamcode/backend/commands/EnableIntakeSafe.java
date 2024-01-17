@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 @Config
 public class EnableIntakeSafe extends CommandBase {
 
-    public static long armTravelWaitTime = 150;
+    public static long armTravelWaitTime = 200;
 
     private ElapsedTime timer;
     private long startMillis;
