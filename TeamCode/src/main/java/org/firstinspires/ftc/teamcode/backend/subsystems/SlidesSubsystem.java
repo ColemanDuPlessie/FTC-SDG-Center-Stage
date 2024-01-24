@@ -27,7 +27,7 @@ public class SlidesSubsystem extends SubsystemBase implements PositionControlled
     public static double kI = 0.0000;
     public static double kD = 0.000065;
     public static double kG = 0.25;
-    public static double maxPower = 0.925;
+    public static double maxPower = 1.0;
 
     private int targetPosition;
 
