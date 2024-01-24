@@ -62,7 +62,7 @@ public class ArmAwareSetSlides extends CommandBase {
         double startPos = slides.getPosition();
         if (startPos < changeoverPosition && targetPos > changeoverPosition) {
             arm.holding();
-            wrist.down();
+            wrist.traveling();
             waitToRaise = true;
             slides.setTargetPosition(targetPos);
         } else if (startPos > changeoverPosition && targetPos < changeoverPosition) {
