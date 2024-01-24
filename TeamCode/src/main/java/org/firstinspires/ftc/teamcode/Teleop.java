@@ -110,6 +110,9 @@ public class Teleop extends CommandbasedOpmode {
         }
     }
 
+    private double slidesSetpoint = 0.3;
+    private double slidesSetpointStep = 0.1;
+
     @Override
     public void start() {
         scheduler.setDefaultCommand(robot.drivetrain, new DriveFromGamepad(robot.drivetrain, pad1, SetDrivingStyle.isFieldCentric));
@@ -121,15 +124,33 @@ public class Teleop extends CommandbasedOpmode {
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
                 .whenReleased(robot.drone::activate);
 
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake));
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.5, timer));
-
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-                .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer))); // TODO closely inspect setpoints
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer, robot.intake)));
+        if (SetDrivingStyle.memorizedSlidePosition) {
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+                    .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake));
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                    .whenReleased(() -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer)));
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+                    .whenReleased(() -> {
+                        slidesSetpoint += slidesSetpointStep;
+                        slidesSetpoint = Math.min(1.0, Math.max(0.3, slidesSetpoint));
+                        scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer));
+                    });
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+                    .whenReleased(() -> {
+                        slidesSetpoint -= slidesSetpointStep;
+                        slidesSetpoint = Math.min(1.0, Math.max(0.3, slidesSetpoint));
+                        scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer));
+                    });
+        } else {
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+                    .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake));
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                    .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.5, timer));
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+                    .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer)));
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+                    .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer, robot.intake)));
+        }
 
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenReleased(this::toggleArm);
