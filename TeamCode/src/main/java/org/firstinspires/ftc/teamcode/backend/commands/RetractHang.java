@@ -7,8 +7,8 @@ import org.firstinspires.ftc.teamcode.backend.subsystems.SlidesSubsystem;
 
 public class RetractHang extends CommandBase {
 
-    public static double finalPos = 0.4;
-    public static long travelDuration = 3500;
+    public static double finalPos = 0.2;
+    public static long travelDuration = 4500;
 
     private SlidesSubsystem slides;
     private ElapsedTime timer;
@@ -24,21 +24,21 @@ public class RetractHang extends CommandBase {
 
     @Override
     public void initialize() {
-        if (slides.getTargetPosition() > 1.0) { // If we are in hang position
+        if (slides.getTargetPosition() > 1.02) { // If we are in hang position
             isRunning = true;
             startMillis = (long)timer.milliseconds();
-            slides.setTargetPosition(1.0);
+            slides.setTargetPosition(0.99);
         } else { isRunning = false; }
     }
 
     @Override
     public void execute() {
         long totalElapsedTime = (long)timer.milliseconds()-startMillis;
-        if (slides.getTargetPosition() > 1.0 || !isRunning) {
+        if (slides.getTargetPosition() > 1.02 || !isRunning) {
             isRunning = false;
             return;
         }
-        double currentTarget = 1.0-totalElapsedTime/travelDuration*(1-finalPos);
+        double currentTarget = 0.99-((double)totalElapsedTime)/((double)travelDuration)*(0.99-finalPos);
         if (currentTarget < finalPos) {
             slides.setTargetPosition(finalPos);
             isRunning = false;
