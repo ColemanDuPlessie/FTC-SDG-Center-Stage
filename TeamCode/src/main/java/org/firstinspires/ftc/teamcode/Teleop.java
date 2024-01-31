@@ -42,6 +42,7 @@ import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedAutoTargete
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.EnableIntakeSafe;
 import org.firstinspires.ftc.teamcode.backend.commands.ReadyArmCarefully;
+import org.firstinspires.ftc.teamcode.backend.commands.RetractHang;
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -122,7 +123,9 @@ public class Teleop extends CommandbasedOpmode {
         gamepad.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
                 .whenReleased(robot.slides::hang);
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
-                .whenReleased(robot.drone::activate);
+                .whenReleased(() -> {robot.drone.activate();
+                scheduler.schedule(new RetractHang(robot.slides, timer)); // RetractHang only does things if we're already in hanging position
+                });
 
         if (SetDrivingStyle.memorizedSlidePosition) {
             gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
