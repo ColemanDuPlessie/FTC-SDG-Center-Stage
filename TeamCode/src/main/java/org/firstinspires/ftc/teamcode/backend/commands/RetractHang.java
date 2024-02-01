@@ -1,14 +1,16 @@
 package org.firstinspires.ftc.teamcode.backend.commands;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.backend.subsystems.SlidesSubsystem;
 
+@Config
 public class RetractHang extends CommandBase {
 
     public static double finalPos = 0.2;
-    public static long travelDuration = 4500;
+    public static long travelDuration = 2000;
 
     private SlidesSubsystem slides;
     private ElapsedTime timer;
