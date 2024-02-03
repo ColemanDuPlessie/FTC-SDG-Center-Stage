@@ -73,7 +73,7 @@ public class Teleop extends CommandbasedOpmode {
 
     private void toggleArm() {
         if (robot.arm.getTargetPosition() == ArmSubsystem.waitingPosition) {
-            scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer));
+            scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer, robot.slides.getPosition() <= 0.35));
         } else {
             robot.arm.toggle();
             robot.wrist.toggle();
