@@ -44,6 +44,7 @@ import org.firstinspires.ftc.teamcode.backend.commands.EnableIntakeSafe;
 import org.firstinspires.ftc.teamcode.backend.commands.ReadyArmCarefully;
 import org.firstinspires.ftc.teamcode.backend.commands.RetractHang;
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -68,6 +69,14 @@ public class Teleop extends CommandbasedOpmode {
         } else {
             robot.arm.down();
             robot.wrist.down();
+        }
+    }
+
+    private void toggleDropdown() {
+        if (robot.intake.getCurrentDropdownPos() == IntakeSubsystem.dropdownUpPos) {
+            robot.intake.lowerDropdown();
+        } else {
+            robot.intake.raiseDropdown();
         }
     }
 
@@ -155,6 +164,8 @@ public class Teleop extends CommandbasedOpmode {
                     .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer, robot.intake)));
         }
 
+        gamepad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+                .whenReleased(this::toggleDropdown);
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenReleased(this::toggleArm);
 

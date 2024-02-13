@@ -2,16 +2,23 @@ package org.firstinspires.ftc.teamcode.backend.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.ServoImpl;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 public class IntakeSubsystem extends SubsystemBase {
 
     public DcMotorImpl motor;
+
+    public ServoImpl rightDropdownServo;
+
+    public static double dropdownUpPos = 1.00;
+    public static double dropdownDownPos = 0.70;
+    public static double dropdownPosDelta = 0.03;
+    private static double dropdownMaxDownPos = dropdownDownPos+4*dropdownPosDelta; // TODO
 
     public static double power = 0.75;
 
@@ -21,6 +28,9 @@ public class IntakeSubsystem extends SubsystemBase {
         motor = ahwMap.get(DcMotorImpl.class, "IntakeMotor");
         motor.setDirection(DcMotorSimple.Direction.REVERSE);
         motor.setPower(currentSpeed);
+
+        rightDropdownServo = ahwMap.get(ServoImpl.class, "RightIntakeDropdownServo");
+        rightDropdownServo.setPosition(dropdownUpPos);
     }
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap, boolean isTeleop) {
@@ -28,6 +38,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public double getCurrentSpeed() {return currentSpeed;}
+    public double getCurrentDropdownPos() {return rightDropdownServo.getPosition();}
 
     public void setSpeed(double speed) {
         currentSpeed = Math.min(Math.max(speed, -1.0), 1.0);
@@ -45,6 +56,14 @@ public class IntakeSubsystem extends SubsystemBase {
     public void toggleOuttake() {
         if (getCurrentSpeed() == -power) {setSpeed(0.0);
         } else {setSpeed(-power);}
+    }
+
+    public void lowerDropdown() {
+        rightDropdownServo.setPosition(dropdownDownPos);
+    }
+
+    public void raiseDropdown() {
+        rightDropdownServo.setPosition(dropdownUpPos);
     }
 
 }
