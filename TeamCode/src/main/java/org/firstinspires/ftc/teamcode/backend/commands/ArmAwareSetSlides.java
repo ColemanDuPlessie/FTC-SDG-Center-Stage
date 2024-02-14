@@ -27,8 +27,8 @@ public class ArmAwareSetSlides extends CommandBase {
 
     private IntakeSubsystem intake = null;
     public static long intakeRuntime = 500;
-    public static double intakePower = -0.35;
-    public static double intakeEnablePoint = 0.05;
+    public static double intakePower = -0.30;
+    public static double intakeEnablePoint = 0.10;
     private long intakeEnableTime;
     private boolean waitToIntake = false;
     private boolean waitToDisableIntake = false;
