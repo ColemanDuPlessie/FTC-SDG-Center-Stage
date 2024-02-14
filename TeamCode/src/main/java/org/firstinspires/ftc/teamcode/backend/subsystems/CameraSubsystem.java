@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.backend.subsystems;
 
+import static java.lang.Thread.sleep;
+
 import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -74,8 +76,16 @@ public class CameraSubsystem extends SubsystemBase {
             FtcDashboard.getInstance().startCameraStream(propProcessor, 0);
         }
 
+/*
+        try {
+            while ((visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
+                sleep(20);
+            } // TODO uber janky
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         setManualExposure(6, 250); // TODO tune
-
+*/
     }
 
     public TeamPropProcessor.PROP_POSITION getPropPosition() {
