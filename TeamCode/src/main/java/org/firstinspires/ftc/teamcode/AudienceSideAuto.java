@@ -76,8 +76,9 @@ public class AudienceSideAuto extends CommandbasedOpmode {
     public static double LRPURPLEDEPOSITY = -36;
     public static double LRPURPLEDEPOSITYOFFSET = -9;
     public static double LRPURPLEDEPOSITTHETA = Math.toRadians(180);
-    public static double CPURPLEDEPOSITY = -31.5;
-
+    public static double CPURPLEDEPOSITY = -24.5;
+    public static double PIXELINTAKEX = -58;
+    public static double PIXELINTAKEY = -24;
 
     double startHeading;
 
@@ -122,18 +123,11 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                 .build();
 
         startCTraj = drive.trajectorySequenceBuilder(startPose)
-                .setReversed(true)
                 .splineToSplineHeading(new Pose2d(CPURPLEDEPOSITX-4, CPURPLEDEPOSITY*0.7+STARTY*0.3, 0), STARTTHETA+REVERSE)
-                .splineToSplineHeading(new Pose2d(CPURPLEDEPOSITX, CPURPLEDEPOSITY*1.1-STARTY*0.1, 0), STARTTHETA+REVERSE)
-                .setReversed(false)
                 .splineToConstantHeading(new Vector2d(CPURPLEDEPOSITX, CPURPLEDEPOSITY), STARTTHETA)
-                .turn(MathUtils.normalizeAngle(STARTTHETA, 0.0))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.purplePixel.activate())
                 .waitSeconds(0.75)
-                .lineToConstantHeading(new Vector2d(CPURPLEDEPOSITX, CPURPLEDEPOSITY*0.5+STARTY*0.5))
-                //.splineToConstantHeading(new Vector2d(CPURPLEDEPOSITX, (CPURPLEDEPOSITY+STARTY)/2), STARTTHETA)
-                //.setReversed(true)
-                //.splineToSplineHeading(preDepositPose, PREDEPOSITTHETA+REVERSE)
+                .splineToConstantHeading(new Vector2d(PIXELINTAKEX, PIXELINTAKEY), REVERSE)
                 .build();
 
         if (!isBlue) {
