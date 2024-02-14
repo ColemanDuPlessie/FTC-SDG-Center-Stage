@@ -13,6 +13,7 @@ public class WristSubsystem extends SubsystemBase {
 
     public static double downPosition = 0.49;
     public static double downWaitingPosition = 0.42;
+    public static double slidesTravelPosition = 0.30;
     public static double waitingPosition = 0.70;
     public static double readyPosition = 0.90;
     public static double upPosition = 0.70;
@@ -40,12 +41,13 @@ public class WristSubsystem extends SubsystemBase {
 
     public void down() {setTargetPosition(downPosition);}
     public void holding() {setTargetPosition(downWaitingPosition);}
+    public void traveling() {setTargetPosition(slidesTravelPosition);}
     public void center() {setTargetPosition(waitingPosition);}
     public void ready() {setTargetPosition(readyPosition);}
     public void deposit() {setTargetPosition(upPosition);}
 
     public void toggle() {
-        if (getTargetPosition() == downWaitingPosition) {
+        if (getTargetPosition() == downWaitingPosition || getTargetPosition() == slidesTravelPosition) {
             down();
         } else if (getTargetPosition() == downPosition) {
             holding();

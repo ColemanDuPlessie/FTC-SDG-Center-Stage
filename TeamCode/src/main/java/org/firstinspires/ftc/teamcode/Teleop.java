@@ -42,7 +42,9 @@ import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedAutoTargete
 import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedDeposit;
 import org.firstinspires.ftc.teamcode.backend.commands.EnableIntakeSafe;
 import org.firstinspires.ftc.teamcode.backend.commands.ReadyArmCarefully;
+import org.firstinspires.ftc.teamcode.backend.commands.RetractHang;
 import org.firstinspires.ftc.teamcode.backend.subsystems.ArmSubsystem;
+import org.firstinspires.ftc.teamcode.backend.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -70,9 +72,17 @@ public class Teleop extends CommandbasedOpmode {
         }
     }
 
+    private void toggleDropdown() {
+        if (robot.intake.getCurrentDropdownPos() == IntakeSubsystem.dropdownUpPos) {
+            robot.intake.lowerDropdown();
+        } else {
+            robot.intake.raiseDropdown();
+        }
+    }
+
     private void toggleArm() {
         if (robot.arm.getTargetPosition() == ArmSubsystem.waitingPosition) {
-            scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer));
+            scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer, robot.slides.getPosition() <= 0.35));
         } else {
             robot.arm.toggle();
             robot.wrist.toggle();
@@ -94,6 +104,10 @@ public class Teleop extends CommandbasedOpmode {
             if (robot.intake.getCurrentSpeed() == 0.0) {
                 scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer, isReversed));
                 return;
+            } else if ((robot.intake.getCurrentSpeed() > 0.0) == isReversed) {
+                robot.intake.setSpeed(0.0);
+                scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer, isReversed));
+                return;
             } else {
                 robot.arm.toggle();
                 robot.wrist.toggle();
@@ -106,6 +120,9 @@ public class Teleop extends CommandbasedOpmode {
         }
     }
 
+    private double slidesSetpoint = 0.3;
+    private double slidesSetpointStep = 0.1;
+
     @Override
     public void start() {
         scheduler.setDefaultCommand(robot.drivetrain, new DriveFromGamepad(robot.drivetrain, pad1, SetDrivingStyle.isFieldCentric));
@@ -115,18 +132,40 @@ public class Teleop extends CommandbasedOpmode {
         gamepad.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON)
                 .whenReleased(robot.slides::hang);
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)
-                .whenReleased(robot.drone::activate);
+                .whenReleased(() -> {robot.drone.activate();
+                scheduler.schedule(new RetractHang(robot.slides, timer)); // RetractHang only does things if we're already in hanging position
+                });
 
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake));
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.5, timer));
+        if (SetDrivingStyle.memorizedSlidePosition) {
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+                    .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake));
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                    .whenReleased(() -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer)));
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+                    .whenReleased(() -> {
+                        slidesSetpoint += slidesSetpointStep;
+                        slidesSetpoint = Math.min(1.0, Math.max(0.3, slidesSetpoint));
+                        scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer));
+                    });
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+                    .whenReleased(() -> {
+                        slidesSetpoint -= slidesSetpointStep;
+                        slidesSetpoint = Math.min(1.0, Math.max(0.3, slidesSetpoint));
+                        scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer));
+                    });
+        } else {
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+                    .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake));
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                    .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.5, timer));
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+                    .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer)));
+            gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+                    .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer, robot.intake)));
+        }
 
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-                .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer))); // TODO closely inspect setpoints
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer, robot.intake)));
-
+        gamepad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+                .whenReleased(this::toggleDropdown);
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenReleased(this::toggleArm);
 

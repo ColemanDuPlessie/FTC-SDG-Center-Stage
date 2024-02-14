@@ -12,7 +12,7 @@ public class DroneSubsystem extends SubsystemBase {
     public ServoImpl servo;
 
     public static double waitingPosition = 0.50;
-    public static double activePosition = 0.70;
+    public static double activePosition = 0.225;
 
     private double targetPosition = waitingPosition;
 

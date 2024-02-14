@@ -18,6 +18,9 @@ public class ReadyArmCarefully extends CommandBase {
     private WristSubsystem wrist;
     private double startWristPos;
     private double startArmPos;
+    private boolean isLow;
+
+    private double armTargetPos;
 
     public ReadyArmCarefully(ArmSubsystem a, WristSubsystem w, ElapsedTime timer) {
         arm = a;
@@ -25,6 +28,16 @@ public class ReadyArmCarefully extends CommandBase {
         addRequirements(a);
         addRequirements(w);
         this.timer = timer;
+        isLow = false;
+    }
+
+    public ReadyArmCarefully(ArmSubsystem a, WristSubsystem w, ElapsedTime timer, boolean isLow) {
+        arm = a;
+        wrist = w;
+        addRequirements(a);
+        addRequirements(w);
+        this.timer = timer;
+        this.isLow = isLow;
     }
 
     @Override
@@ -36,6 +49,7 @@ public class ReadyArmCarefully extends CommandBase {
         this.startMillis = (long) timer.milliseconds();
         startWristPos = wrist.getPosition();
         startArmPos = arm.getPosition();
+        armTargetPos = isLow ? ArmSubsystem.upLowPosition : ArmSubsystem.upPosition;
         wrist.deposit();
     }
 
@@ -44,7 +58,7 @@ public class ReadyArmCarefully extends CommandBase {
         double completeness = (timer.milliseconds() - startMillis) / duration;
         completeness = Math.min(completeness, 1.0);
         wrist.setTargetPosition(WristSubsystem.readyPosition*completeness + startWristPos*(1-completeness));
-        arm.setTargetPosition(ArmSubsystem.upPosition*completeness + startArmPos*(1-completeness));
+        arm.setTargetPosition(armTargetPos*completeness + startArmPos*(1-completeness));
     }
 
     @Override
