@@ -69,7 +69,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
 
     private static final double REVERSE = Math.toRadians(180);
 
-    public static double STARTX = 12;
+    public static double STARTX = -36;
     public static double STARTY = -63;
     public static double STARTTHETA = Math.toRadians(-90);
     public static double LRPURPLEDEPOSITX = 17.5;
@@ -78,16 +78,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
     public static double LRPURPLEDEPOSITYOFFSET = -9;
     public static double LRPURPLEDEPOSITTHETA = Math.toRadians(180);
     public static double CPURPLEDEPOSITY = -31.5;
-    public static double PREDEPOSITX = 38;
-    public static double PREDEPOSITY = -36;
-    public static double PREDEPOSITTHETA = REVERSE;
-    public static double DEPOSITX = 52.5;
-    public static double DEPOSITY = -36;
-    public static double DEPOSITYOFFSET = 7; // The actual pitch is 6 in, but we want to err on the side of correctness
-    public static double DEPOSITYSIDEBASEDOFFSET = 1.5;
-    public static double DEPOSITTHETA = REVERSE;
-    public static double PARKX = 60;
-    public static double PARKY = -60;
+
 
     double startHeading;
 
@@ -103,16 +94,12 @@ public class AudienceSideAuto extends CommandbasedOpmode {
             STARTY *= -1;
             STARTTHETA -= REVERSE;
             CPURPLEDEPOSITY *= -1;
-            PREDEPOSITY *= -1;
-            DEPOSITY *= -1;
-            PARKY *= -1;
             CPURPLEDEPOSITX += 3.0;
             LRPURPLEDEPOSITY *= -1;
             LRPURPLEDEPOSITY += LRPURPLEDEPOSITYOFFSET;
             LRPURPLEDEPOSITXOFFSET *= -1;
             LRPURPLEDEPOSITTHETA -= REVERSE;
         }
-        DEPOSITY += DEPOSITYSIDEBASEDOFFSET;
 
         startHeading = robot.drivetrain.getHeading();
 
@@ -121,32 +108,28 @@ public class AudienceSideAuto extends CommandbasedOpmode {
         drive = new SampleMecanumDrive(hardwareMap);
         drive.setPoseEstimate(startPose);
 
-        Pose2d depositPose = new Pose2d(DEPOSITX, DEPOSITY, DEPOSITTHETA);
-        Pose2d preDepositPose = new Pose2d(PREDEPOSITX, PREDEPOSITY, PREDEPOSITTHETA);
-        Vector2d preParkPose = new Vector2d(DEPOSITX-4, (DEPOSITY+PARKY)/2);
-        Vector2d parkPose = new Vector2d(PARKX, PARKY);
 
         double LFirstXPos = actingAsBlue ? STARTX*0.7+(LRPURPLEDEPOSITX-LRPURPLEDEPOSITXOFFSET)*0.3 : STARTX;
 
         startLTraj = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(LFirstXPos, LRPURPLEDEPOSITY*0.8+STARTY*0.2, PREDEPOSITTHETA+REVERSE), STARTTHETA+REVERSE)
+                .splineToSplineHeading(new Pose2d(LFirstXPos, LRPURPLEDEPOSITY*0.8+STARTY*0.2, 0), STARTTHETA+REVERSE)
                 .splineToConstantHeading(new Vector2d(LRPURPLEDEPOSITX-LRPURPLEDEPOSITXOFFSET, LRPURPLEDEPOSITY), LRPURPLEDEPOSITTHETA)
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.purplePixel.activate())
                 .waitSeconds(0.75)
                 .setReversed(false)
-                .lineToConstantHeading(new Vector2d(STARTX, PREDEPOSITY))
-                .lineToConstantHeading(new Vector2d(STARTX, STARTY*0.8+PREDEPOSITY*0.2))
+                //TODO.lineToConstantHeading(new Vector2d(STARTX, PREDEPOSITY))
+                //.lineToConstantHeading(new Vector2d(STARTX, STARTY*0.8+PREDEPOSITY*0.2))
                 //.turn(REVERSE)
                 .build();
 
         startCTraj = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(CPURPLEDEPOSITX*0.8+PREDEPOSITX*0.2, CPURPLEDEPOSITY*0.7+STARTY*0.3, DEPOSITTHETA+REVERSE), STARTTHETA+REVERSE)
-                .splineToSplineHeading(new Pose2d(CPURPLEDEPOSITX, CPURPLEDEPOSITY*1.1-STARTY*0.1, DEPOSITTHETA+REVERSE), STARTTHETA+REVERSE)
+                .splineToSplineHeading(new Pose2d(CPURPLEDEPOSITX+4, CPURPLEDEPOSITY*0.7+STARTY*0.3, 0), STARTTHETA+REVERSE)
+                .splineToSplineHeading(new Pose2d(CPURPLEDEPOSITX, CPURPLEDEPOSITY*1.1-STARTY*0.1, 0), STARTTHETA+REVERSE)
                 .setReversed(false)
                 .splineToConstantHeading(new Vector2d(CPURPLEDEPOSITX, CPURPLEDEPOSITY), STARTTHETA)
-                .turn(MathUtils.normalizeAngle(STARTTHETA-(DEPOSITTHETA-REVERSE), 0.0))
+                .turn(MathUtils.normalizeAngle(STARTTHETA, 0.0))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.purplePixel.activate())
                 .waitSeconds(0.75)
                 .lineToConstantHeading(new Vector2d(CPURPLEDEPOSITX, CPURPLEDEPOSITY*0.5+STARTY*0.5))
@@ -170,7 +153,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
         } else {
             startRTraj = drive.trajectorySequenceBuilder(startPose)
                     .setReversed(true)
-                    .splineToSplineHeading(new Pose2d(STARTX*0.7+(LRPURPLEDEPOSITX+LRPURPLEDEPOSITXOFFSET)*0.3, LRPURPLEDEPOSITY*0.8+STARTY*0.2, PREDEPOSITTHETA+REVERSE), STARTTHETA+REVERSE)
+                    .splineToSplineHeading(new Pose2d(STARTX*0.7+(LRPURPLEDEPOSITX+LRPURPLEDEPOSITXOFFSET)*0.3, LRPURPLEDEPOSITY*0.8+STARTY*0.2, 0), STARTTHETA+REVERSE)
                     .splineToConstantHeading(new Vector2d(LRPURPLEDEPOSITX+LRPURPLEDEPOSITXOFFSET, LRPURPLEDEPOSITY), LRPURPLEDEPOSITTHETA+REVERSE)
                     .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.purplePixel.activate())
                     .waitSeconds(0.75)
