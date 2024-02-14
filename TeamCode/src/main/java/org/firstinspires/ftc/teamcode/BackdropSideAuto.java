@@ -55,9 +55,9 @@ import java.util.ArrayList;
  * I should probably document this...
  */
 
-@Autonomous(name="Auto (THIS ONE)")
+@Autonomous(name="Backdrop Side Auto")
 @Config
-public class Auto extends CommandbasedOpmode {
+public class BackdropSideAuto extends CommandbasedOpmode {
 
     boolean actingAsBlue;
 

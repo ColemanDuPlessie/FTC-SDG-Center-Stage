@@ -55,9 +55,9 @@ import java.util.ArrayList;
  * I should probably document this...
  */
 
-@Autonomous(name="Sketchy Low Profile Auto (AUDIENCE SIDE ONLY)")
+@Autonomous(name="Audience Side Auto")
 @Config
-public class SketchyLowProfileAuto extends CommandbasedOpmode {
+public class AudienceSideAuto extends CommandbasedOpmode {
 
     boolean actingAsBlue;
 
