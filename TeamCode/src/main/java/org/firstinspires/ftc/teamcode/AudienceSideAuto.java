@@ -59,7 +59,6 @@ import java.util.ArrayList;
 @Config
 public class AudienceSideAuto extends CommandbasedOpmode {
 
-    boolean actingAsBlue;
 
     SampleMecanumDrive drive;
 
@@ -86,11 +85,10 @@ public class AudienceSideAuto extends CommandbasedOpmode {
     public void init() {
         robot.init(hardwareMap, false);
 
-        actingAsBlue = isBlue ^ startAudienceSide;
 
         double CPURPLEDEPOSITX = STARTX;
 
-        if (actingAsBlue) {
+        if (isBlue) {
             STARTY *= -1;
             STARTTHETA -= REVERSE;
             CPURPLEDEPOSITY *= -1;
@@ -109,7 +107,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
         drive.setPoseEstimate(startPose);
 
 
-        double LFirstXPos = actingAsBlue ? STARTX*0.7+(LRPURPLEDEPOSITX-LRPURPLEDEPOSITXOFFSET)*0.3 : STARTX;
+        double LFirstXPos = isBlue ? STARTX*0.7+(LRPURPLEDEPOSITX-LRPURPLEDEPOSITXOFFSET)*0.3 : STARTX;
 
         startLTraj = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(true)
@@ -125,7 +123,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
 
         startCTraj = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(CPURPLEDEPOSITX+4, CPURPLEDEPOSITY*0.7+STARTY*0.3, 0), STARTTHETA+REVERSE)
+                .splineToSplineHeading(new Pose2d(CPURPLEDEPOSITX-4, CPURPLEDEPOSITY*0.7+STARTY*0.3, 0), STARTTHETA+REVERSE)
                 .splineToSplineHeading(new Pose2d(CPURPLEDEPOSITX, CPURPLEDEPOSITY*1.1-STARTY*0.1, 0), STARTTHETA+REVERSE)
                 .setReversed(false)
                 .splineToConstantHeading(new Vector2d(CPURPLEDEPOSITX, CPURPLEDEPOSITY), STARTTHETA)
@@ -138,7 +136,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                 //.splineToSplineHeading(preDepositPose, PREDEPOSITTHETA+REVERSE)
                 .build();
 
-        if (actingAsBlue) {
+        if (!isBlue) {
             startRTraj = drive.trajectorySequenceBuilder(startPose)
                     .setReversed(true)
                     .lineToConstantHeading(new Vector2d(STARTX, LRPURPLEDEPOSITY-LRPURPLEDEPOSITYOFFSET))
