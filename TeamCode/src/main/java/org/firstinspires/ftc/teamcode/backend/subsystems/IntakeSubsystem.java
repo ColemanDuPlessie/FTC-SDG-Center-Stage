@@ -17,7 +17,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public static double dropdownUpPos = 1.00;
     public static double dropdownDownPos = 0.70;
-    public static double dropdownPosDelta = 0.03;
+    public static double dropdownPosDelta = 0.05;
     private static double dropdownMaxDownPos = dropdownDownPos+4*dropdownPosDelta; // TODO
 
     public static double power = 0.75;
@@ -59,7 +59,12 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void lowerDropdown() {
-        rightDropdownServo.setPosition(dropdownDownPos);
+        lowerDropdown(0);
+    }
+
+    public void lowerDropdown(int pixelsMissed) {
+        if (pixelsMissed > 4) {pixelsMissed = 4;} else if (pixelsMissed < 0) {pixelsMissed = 0;}
+        rightDropdownServo.setPosition(dropdownDownPos+dropdownPosDelta*pixelsMissed);
     }
 
     public void raiseDropdown() {

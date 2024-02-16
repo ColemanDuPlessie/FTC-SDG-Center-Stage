@@ -82,6 +82,9 @@ public class ArmAwareSetSlides extends CommandBase {
         if (targetPos < intakeEnablePoint && intake != null) {
             waitToIntake = true;
         }
+        if (startPos < intakeEnablePoint && targetPos >= intakeEnablePoint && intake != null) {
+            intake.raiseDropdown();
+        }
     }
 
     @Override

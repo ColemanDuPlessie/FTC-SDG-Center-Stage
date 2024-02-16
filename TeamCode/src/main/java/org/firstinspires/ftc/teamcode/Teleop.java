@@ -74,7 +74,7 @@ public class Teleop extends CommandbasedOpmode {
 
     private void toggleDropdown() {
         if (robot.intake.getCurrentDropdownPos() == IntakeSubsystem.dropdownUpPos) {
-            robot.intake.lowerDropdown();
+            robot.intake.lowerDropdown(dropdownSetpoint);
         } else {
             robot.intake.raiseDropdown();
         }
@@ -122,6 +122,7 @@ public class Teleop extends CommandbasedOpmode {
 
     private double slidesSetpoint = 0.3;
     private double slidesSetpointStep = 0.1;
+    private int dropdownSetpoint = 4; // Min = 0, Max = 4
 
     @Override
     public void start() {
@@ -140,34 +141,36 @@ public class Teleop extends CommandbasedOpmode {
             gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
                     .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake));
             gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                    .whenReleased(() -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer)));
+                    .whenReleased(() -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer, robot.intake)));
             gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                     .whenReleased(() -> {
                         slidesSetpoint += slidesSetpointStep;
                         slidesSetpoint = Math.min(1.0, Math.max(0.3, slidesSetpoint));
-                        scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer));
+                        scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer, robot.intake));
                     });
             gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
                     .whenReleased(() -> {
                         slidesSetpoint -= slidesSetpointStep;
                         slidesSetpoint = Math.min(1.0, Math.max(0.3, slidesSetpoint));
-                        scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer));
+                        scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, slidesSetpoint, timer, robot.intake));
                     });
         } else {
             gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
                     .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake));
             gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                    .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.5, timer));
+                    .whenReleased(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.5, timer, robot.intake));
             gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-                    .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer)));
+                    .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, 0.1, timer, robot.intake)));
             gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
                     .whenReleased(() -> scheduler.schedule(new ArmAwareIncrementSlides(robot.slides, robot.arm, robot.wrist, -0.1, timer, robot.intake)));
         }
 
         gamepad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenReleased(this::toggleDropdown);
+                .whenReleased(() -> {dropdownSetpoint = Math.max(0, dropdownSetpoint-1); robot.intake.lowerDropdown(dropdownSetpoint);});
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenReleased(this::toggleArm);
+                .whenReleased(() -> {dropdownSetpoint = Math.min(4, dropdownSetpoint+1); robot.intake.lowerDropdown(dropdownSetpoint);});
+        // gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+        //         .whenReleased(this::toggleArm);
 
         gamepad.getGamepadButton(GamepadKeys.Button.A)
                 .whenReleased(() -> toggleIntake(false));
@@ -176,7 +179,9 @@ public class Teleop extends CommandbasedOpmode {
         gamepad.getGamepadButton(GamepadKeys.Button.B)
                 .whenReleased(() -> toggleIntake(true));
         gamepad.getGamepadButton(GamepadKeys.Button.Y)
-                .whenPressed(new AutoTargetBackdrop(robot.drivetrain, robot.camera, pad1, timer, robot.slides));
+                .whenReleased(this::toggleDropdown);
+        // gamepad.getGamepadButton(GamepadKeys.Button.Y)
+        //         .whenPressed(new AutoTargetBackdrop(robot.drivetrain, robot.camera, pad1, timer, robot.slides));
 
     }
 
