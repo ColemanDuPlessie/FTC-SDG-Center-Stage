@@ -13,11 +13,13 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public DcMotorImpl motor;
 
+    public ServoImpl leftDropdownServo;
     public ServoImpl rightDropdownServo;
 
     public static double dropdownUpPos = 0.98;
-    public static double dropdownDownPos = 0.58;
-    public static double dropdownPosDelta = 0.035;
+    public static double dropdownLeftPosOffset = 0.27;
+    public static double dropdownDownPos = 0.59;
+    public static double dropdownPosDelta = 0.033;
 
     public static double power = 0.75;
 
@@ -30,6 +32,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
         rightDropdownServo = ahwMap.get(ServoImpl.class, "RightIntakeDropdownServo");
         rightDropdownServo.setPosition(dropdownUpPos);
+        leftDropdownServo = ahwMap.get(ServoImpl.class, "LeftIntakeDropdownServo");
+        leftDropdownServo.setPosition(1-dropdownUpPos+dropdownLeftPosOffset);
     }
 
     public void init(ElapsedTime aTimer, HardwareMap ahwMap, boolean isTeleop) {
@@ -63,11 +67,14 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void lowerDropdown(int pixelsMissed) {
         if (pixelsMissed > 4) {pixelsMissed = 4;} else if (pixelsMissed < 0) {pixelsMissed = 0;}
-        rightDropdownServo.setPosition(dropdownDownPos+dropdownPosDelta*pixelsMissed);
+        double targetPos = dropdownDownPos+dropdownPosDelta*pixelsMissed;
+        rightDropdownServo.setPosition(targetPos);
+        leftDropdownServo.setPosition(1-targetPos+dropdownLeftPosOffset);
     }
 
     public void raiseDropdown() {
         rightDropdownServo.setPosition(dropdownUpPos);
+        leftDropdownServo.setPosition(1-dropdownUpPos+dropdownLeftPosOffset);
     }
 
 }
