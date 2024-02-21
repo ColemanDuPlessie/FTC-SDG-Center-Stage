@@ -32,9 +32,13 @@ package org.firstinspires.ftc.teamcode;
 import static org.firstinspires.ftc.teamcode.SetDrivingStyle.isBlue;
 import static org.firstinspires.ftc.teamcode.SetDrivingStyle.startAudienceSide;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -69,6 +73,8 @@ public class AudienceSideAuto extends CommandbasedOpmode {
 
     TrajectorySequence intakeTraj;
 
+    TrajectorySequence traverseTraj;
+
     private static final double REVERSE = Math.toRadians(180);
     private static double CLOCKWISE90 = Math.toRadians(-90);
 
@@ -82,6 +88,9 @@ public class AudienceSideAuto extends CommandbasedOpmode {
     public static double CPURPLEDEPOSITY = -24.5;
     public static double PIXELINTAKEX = -58;
     public static double PIXELINTAKEY = -24;
+    public static double TRAVERSESTARTX = -56;
+    public static double TRAVERSEENDX = 48; // TODO
+    public static double TRAVERSEY = -12;
 
     double startHeading;
 
@@ -146,13 +155,31 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                     scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer));
                     robot.intake.lowerDropdown(4);
                 })
-                .lineTo(new Vector2d(PIXELINTAKEX-3.5, PIXELINTAKEY))
-                .waitSeconds(2.0)
+                .lineTo(new Vector2d(PIXELINTAKEX-1, PIXELINTAKEY))
+                .waitSeconds(1.5)
+                .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.raiseDropdown())
+                .lineTo(new Vector2d(PIXELINTAKEX-3, PIXELINTAKEY))
+                .waitSeconds(1.0)
+                .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.hold())
                 .lineTo(new Vector2d(PIXELINTAKEX, PIXELINTAKEY))
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    robot.intake.hold();
-                    robot.intake.raiseDropdown();
+                .build();
+
+        traverseTraj = drive.trajectorySequenceBuilder(new Pose2d(PIXELINTAKEX, PIXELINTAKEY, REVERSE))
+                .setConstraints(new TrajectoryVelocityConstraint() {
+                    public double get(double v, Pose2d pose2d, Pose2d pose2d1, Pose2d pose2d2) {
+                        return 35;
+                    }
+                }, new TrajectoryAccelerationConstraint() {
+                    public double get(double v, Pose2d pose2d, Pose2d pose2d1, Pose2d pose2d2) {
+                        return 30;
+                    }
                 })
+                .addTemporalMarker(3.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
+                .addTemporalMarker(4.0, () -> robot.slides.setTargetPosition(0.0))
+                .addTemporalMarker(4.5, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
+                .splineToConstantHeading(new Vector2d(PIXELINTAKEX, PIXELINTAKEY*0.75+TRAVERSEY*0.25), -CLOCKWISE90)
+                .splineToConstantHeading(new Vector2d(TRAVERSESTARTX, TRAVERSEY), 0)
+                .splineToConstantHeading(new Vector2d(TRAVERSEENDX, TRAVERSEY), 0)
                 .build();
     }
 
@@ -191,6 +218,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                 break;
         }
         auto.add(new FollowRRTraj(robot.drivetrain, drive, intakeTraj));
+        auto.add(new FollowRRTraj(robot.drivetrain, drive, traverseTraj));
         scheduler.schedule(false, new SequentialCommandGroup(auto.toArray(new Command[0])));
     }
 
