@@ -51,6 +51,7 @@ import org.firstinspires.ftc.teamcode.backend.commands.DriverAssistedAutoTargete
 import org.firstinspires.ftc.teamcode.backend.commands.EnableIntakeSafe;
 import org.firstinspires.ftc.teamcode.backend.commands.FollowRRTraj;
 import org.firstinspires.ftc.teamcode.backend.commands.ReadyArmCarefully;
+import org.firstinspires.ftc.teamcode.backend.commands.SlowIntakeFromStack;
 import org.firstinspires.ftc.teamcode.backend.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.backend.roadrunner.trajectorysequence.TrajectorySequence;
 
@@ -174,6 +175,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                         scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer));
                         robot.intake.lowerDropdown(4);
                     })
+                    .UNSTABLE_addTemporalMarkerOffset(0.5, () -> new SlowIntakeFromStack(robot.intake, timer))
                     .lineTo(new Vector2d(PIXELINTAKEX - 1, PIXELINTAKEY))
                     .waitSeconds(1.5)
                     .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.raiseDropdown())

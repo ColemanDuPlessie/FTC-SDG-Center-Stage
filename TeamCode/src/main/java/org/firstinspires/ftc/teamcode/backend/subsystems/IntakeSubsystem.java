@@ -77,4 +77,9 @@ public class IntakeSubsystem extends SubsystemBase {
         leftDropdownServo.setPosition(1-dropdownUpPos+dropdownLeftPosOffset);
     }
 
+    public void setRawDropdownPos(double pos) {
+        rightDropdownServo.setPosition(pos);
+        leftDropdownServo.setPosition(1-pos+dropdownLeftPosOffset);
+    }
+
 }
