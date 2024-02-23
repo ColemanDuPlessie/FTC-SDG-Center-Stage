@@ -18,7 +18,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public static double dropdownUpPos = 0.95;
     public static double dropdownLeftPosOffset = 0.2575;
-    public static double dropdownDownPos = 0.57;
+    public static double dropdownDownPos = 0.56;
     public static double dropdownPosDelta = 0.033;
 
     public static double power = 0.75;

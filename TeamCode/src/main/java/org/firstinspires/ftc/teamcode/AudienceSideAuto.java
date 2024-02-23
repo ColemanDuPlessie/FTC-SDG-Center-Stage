@@ -116,6 +116,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
         if (isBlue) {
             CLOCKWISE90 *= -1;
             STARTY *= -1;
+            STARTX -= 1; // TODO?
             STARTTHETA -= REVERSE;
             CPURPLEDEPOSITY *= -1;
             LRPURPLEDEPOSITY *= -1;

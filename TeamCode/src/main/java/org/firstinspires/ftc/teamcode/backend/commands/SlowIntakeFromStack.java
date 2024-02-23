@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.backend.subsystems.WristSubsystem;
 public class SlowIntakeFromStack extends CommandBase {
 
     public static long dropdownTravelTime = 500;
-    public static double posDelta = -0.015;
+    public static double posDelta = -0.02;
 
     private ElapsedTime timer;
     private long startMillis;
