@@ -46,6 +46,8 @@ public class SetDrivingStyle extends CommandbasedOpmode {
     ToggleButton bToggle;
     ToggleButton xToggle;
     ToggleButton yToggle;
+
+    ToggleButton lToggle;
     ToggleButton rToggle;
 
     public static boolean depositAutoRetract     = false;
@@ -53,6 +55,7 @@ public class SetDrivingStyle extends CommandbasedOpmode {
     public static boolean isFieldCentric         = false;
     public static boolean isBlue                 = false;
     public static boolean memorizedSlidePosition = false;
+    public static boolean autoParkCenter = false;
 
     @Override
     public void init() {
@@ -61,6 +64,7 @@ public class SetDrivingStyle extends CommandbasedOpmode {
         xToggle = new ToggleButton(pad1::getX);
         yToggle = new ToggleButton(pad1::getY);
         rToggle = new ToggleButton(pad1::getRightBumper);
+        lToggle = new ToggleButton(pad1::getLeftBumper);
 
         robot.init(hardwareMap, true);
     }
@@ -72,12 +76,14 @@ public class SetDrivingStyle extends CommandbasedOpmode {
         isFieldCentric         = xToggle.get();
         isBlue                 = yToggle.get();
         memorizedSlidePosition = rToggle.get();
+        autoParkCenter = lToggle.get();
 
         telemetry.addData("Depositing automatically lowers slides?: (toggle with a)", depositAutoRetract);
         telemetry.addData("Auto Start Position: (toggle with b)", startAudienceSide ? "Audience Side (worse)" : "Backdrop Side (better)");
         telemetry.addData("Field Centric?: (toggle with x)", isFieldCentric);
         telemetry.addData("We are on the (toggle with y)", isBlue ? "Blue Alliance" : "Red Alliance");
         telemetry.addData("Slide height is (toggle with r bumper)", memorizedSlidePosition ? "Memorized & Adjustable (WIP)" : "Setpoints");
+        telemetry.addData("Auto parks closer to (toggle with l bumper)", autoParkCenter ? "Center of Field" : "Edges of Field");
     }
 
     @Override

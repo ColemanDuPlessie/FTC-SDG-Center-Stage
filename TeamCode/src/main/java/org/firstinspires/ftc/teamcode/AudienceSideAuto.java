@@ -75,14 +75,18 @@ public class AudienceSideAuto extends CommandbasedOpmode {
 
     TrajectorySequence traverseTraj;
 
+    TrajectorySequence depositLTraj;
+    TrajectorySequence depositCTraj;
+    TrajectorySequence depositRTraj;
+
     private static final double REVERSE = Math.toRadians(180);
     private static double CLOCKWISE90 = Math.toRadians(-90);
 
     public static double STARTX = -36;
     public static double STARTY = -63;
-    public static double STARTTHETA = Math.toRadians(-90);
+    public static double STARTTHETA = CLOCKWISE90;
     public static double LRPURPLEDEPOSITX = -43.5;
-    public static double LRPURPLEDEPOSITXOFFSET = 11.5; // This is correct for Red R, Bule L, and must be negated for Red L, Blue R
+    public static double LRPURPLEDEPOSITXOFFSET = 11.5; // This is correct for Red R, Blue L, and must be negated for Red L, Blue R
     public static double LRPURPLEDEPOSITY = -36;
     public static double LRPURPLEDEPOSITTHETA = REVERSE;
     public static double CPURPLEDEPOSITY = -24.5;
@@ -91,6 +95,12 @@ public class AudienceSideAuto extends CommandbasedOpmode {
     public static double TRAVERSESTARTX = -56;
     public static double TRAVERSEENDX = 48; // TODO
     public static double TRAVERSEY = -12;
+
+    public static double DEPOSITX = 52.5;
+    public static double DEPOSITY = -34.5;
+    public static double DEPOSITYDELTA = -6;
+    public static double PARKX = 63;
+    public static double PARKY = SetDrivingStyle.autoParkCenter ? -12 : -60;
 
     double startHeading;
 
@@ -104,8 +114,10 @@ public class AudienceSideAuto extends CommandbasedOpmode {
             STARTTHETA -= REVERSE;
             CPURPLEDEPOSITY *= -1;
             LRPURPLEDEPOSITY *= -1;
-            LRPURPLEDEPOSITXOFFSET *= -1;
-            LRPURPLEDEPOSITTHETA -= REVERSE;
+            PIXELINTAKEY *= -1;
+            TRAVERSEY *= -1;
+            DEPOSITY *= -1;
+            PARKY *= -1;
         }
 
         startHeading = robot.drivetrain.getHeading();
@@ -165,13 +177,9 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                 .build();
 
         traverseTraj = drive.trajectorySequenceBuilder(new Pose2d(PIXELINTAKEX, PIXELINTAKEY, REVERSE))
-                .setConstraints(new TrajectoryVelocityConstraint() {
+                .setVelConstraint(new TrajectoryVelocityConstraint() {
                     public double get(double v, Pose2d pose2d, Pose2d pose2d1, Pose2d pose2d2) {
                         return 35;
-                    }
-                }, new TrajectoryAccelerationConstraint() {
-                    public double get(double v, Pose2d pose2d, Pose2d pose2d1, Pose2d pose2d2) {
-                        return 30;
                     }
                 })
                 .addTemporalMarker(3.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
@@ -180,6 +188,42 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                 .splineToConstantHeading(new Vector2d(PIXELINTAKEX, PIXELINTAKEY*0.75+TRAVERSEY*0.25), -CLOCKWISE90)
                 .splineToConstantHeading(new Vector2d(TRAVERSESTARTX, TRAVERSEY), 0)
                 .splineToConstantHeading(new Vector2d(TRAVERSEENDX, TRAVERSEY), 0)
+                .build();
+
+        depositLTraj = drive.trajectorySequenceBuilder(new Pose2d(TRAVERSEENDX, TRAVERSEY, REVERSE))
+                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY*0.5+TRAVERSEY*0.5-DEPOSITYDELTA*0.5), CLOCKWISE90)
+                .splineToConstantHeading(new Vector2d(DEPOSITX, DEPOSITY-DEPOSITYDELTA), 0)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
+                .waitSeconds(2)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY-DEPOSITYDELTA), REVERSE)
+                .splineToConstantHeading(new Vector2d(DEPOSITX-4, PARKY), (Math.abs(PARKY)>36) ? CLOCKWISE90 : -CLOCKWISE90)
+                .lineToConstantHeading(new Vector2d(PARKX, PARKY))
+                .build();
+
+        depositCTraj = drive.trajectorySequenceBuilder(new Pose2d(TRAVERSEENDX, TRAVERSEY, REVERSE))
+                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY*0.5+TRAVERSEY*0.5), CLOCKWISE90)
+                .splineToConstantHeading(new Vector2d(DEPOSITX, DEPOSITY), 0)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
+                .waitSeconds(2)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY), REVERSE)
+                .splineToConstantHeading(new Vector2d(DEPOSITX-4, PARKY), (Math.abs(PARKY)>36) ? CLOCKWISE90 : -CLOCKWISE90)
+                .lineToConstantHeading(new Vector2d(PARKX, PARKY))
+                .build();
+
+        depositRTraj = drive.trajectorySequenceBuilder(new Pose2d(TRAVERSEENDX, TRAVERSEY, REVERSE))
+                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY*0.5+TRAVERSEY*0.5+DEPOSITYDELTA*0.5), CLOCKWISE90)
+                .splineToConstantHeading(new Vector2d(DEPOSITX, DEPOSITY+DEPOSITYDELTA), 0)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
+                .waitSeconds(2)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY+DEPOSITYDELTA), REVERSE)
+                .splineToConstantHeading(new Vector2d(DEPOSITX-4, PARKY), (Math.abs(PARKY)>36) ? CLOCKWISE90 : -CLOCKWISE90)
+                .lineToConstantHeading(new Vector2d(PARKX, PARKY))
                 .build();
     }
 
@@ -204,21 +248,26 @@ public class AudienceSideAuto extends CommandbasedOpmode {
             startLTraj = startRTraj;
             startRTraj = temp;
         }
+        TrajectorySequence depositTraj;
         ArrayList<Command> auto = new ArrayList<>();
         switch (robot.camera.getPropPosition()) {
             case LEFT:
                 auto.add(new FollowRRTraj(robot.drivetrain, drive, startLTraj));
+                depositTraj = depositLTraj;
                 break;
             case RIGHT:
                 auto.add(new FollowRRTraj(robot.drivetrain, drive, startRTraj));
+                depositTraj = depositRTraj;
                 break;
             case CENTER:
             default: // This shouldn't do anything if everything is working
                 auto.add(new FollowRRTraj(robot.drivetrain, drive, startCTraj));
+                depositTraj = depositCTraj;
                 break;
         }
         auto.add(new FollowRRTraj(robot.drivetrain, drive, intakeTraj));
         auto.add(new FollowRRTraj(robot.drivetrain, drive, traverseTraj));
+        auto.add(new FollowRRTraj(robot.drivetrain, drive, depositTraj));
         scheduler.schedule(false, new SequentialCommandGroup(auto.toArray(new Command[0])));
     }
 
