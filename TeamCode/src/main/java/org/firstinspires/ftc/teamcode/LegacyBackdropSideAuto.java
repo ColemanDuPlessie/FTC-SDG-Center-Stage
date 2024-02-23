@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.SetDrivingStyle.isBlue;
-import static org.firstinspires.ftc.teamcode.SetDrivingStyle.startAudienceSide;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -104,7 +103,7 @@ public class LegacyBackdropSideAuto extends CommandbasedOpmode {
     public void init() {
         robot.init(hardwareMap, false);
 
-        actingAsBlue = isBlue ^ startAudienceSide;
+        actingAsBlue = isBlue ^ false;
 
         double CPURPLEDEPOSITX = STARTX;
 
@@ -187,7 +186,7 @@ public class LegacyBackdropSideAuto extends CommandbasedOpmode {
                     .build();
         }
 
-        if (!startAudienceSide) {
+        if (true) {
             prepDepositTraj = drive.trajectorySequenceBuilder(preDepositPose)
                     .setReversed(true)
                     .addTemporalMarker(0.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
@@ -261,7 +260,7 @@ public class LegacyBackdropSideAuto extends CommandbasedOpmode {
                 deposit = new FollowRRTraj(robot.drivetrain, drive, depositCTraj);
                 break;
         }
-        if (!startAudienceSide) {
+        if (true) {
             auto.add(new FollowRRTraj(robot.drivetrain, drive, prepDepositTraj));
             auto.add(deposit);
             auto.add(new FollowRRTraj(robot.drivetrain, drive, parkTraj));

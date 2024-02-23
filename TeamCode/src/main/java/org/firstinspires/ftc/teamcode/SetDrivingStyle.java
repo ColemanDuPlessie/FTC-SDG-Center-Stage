@@ -51,7 +51,7 @@ public class SetDrivingStyle extends CommandbasedOpmode {
     ToggleButton rToggle;
 
     public static boolean depositAutoRetract     = false;
-    public static boolean startAudienceSide      = false;
+    public static boolean shortAuto              = false;
     public static boolean isFieldCentric         = false;
     public static boolean isBlue                 = false;
     public static boolean memorizedSlidePosition = false;
@@ -72,14 +72,14 @@ public class SetDrivingStyle extends CommandbasedOpmode {
     @Override
     public void init_loop() {
         depositAutoRetract     = aToggle.get();
-        startAudienceSide      = bToggle.get();
+        shortAuto              = bToggle.get();
         isFieldCentric         = xToggle.get();
         isBlue                 = yToggle.get();
         memorizedSlidePosition = rToggle.get();
         autoParkCenter = lToggle.get();
 
         telemetry.addData("Depositing automatically lowers slides?: (toggle with a)", depositAutoRetract);
-        telemetry.addData("Auto Start Position: (toggle with b)", startAudienceSide ? "Audience Side (worse)" : "Backdrop Side (better)");
+        telemetry.addData("Auto type: (toggle with b)", shortAuto ? "No cycles (worse)" : "Cycles (longer)");
         telemetry.addData("Field Centric?: (toggle with x)", isFieldCentric);
         telemetry.addData("We are on the (toggle with y)", isBlue ? "Blue Alliance" : "Red Alliance");
         telemetry.addData("Slide height is (toggle with r bumper)", memorizedSlidePosition ? "Memorized & Adjustable (WIP)" : "Setpoints");

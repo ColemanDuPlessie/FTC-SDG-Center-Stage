@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.SetDrivingStyle.isBlue;
-import static org.firstinspires.ftc.teamcode.SetDrivingStyle.startAudienceSide;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -92,7 +91,7 @@ public class LegacyAudienceSideAuto extends CommandbasedOpmode {
     public void init() {
         robot.init(hardwareMap, false);
 
-        actingAsBlue = isBlue ^ startAudienceSide;
+        actingAsBlue = isBlue ^ true;
 
         double CPURPLEDEPOSITX = STARTX;
 

@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.SetDrivingStyle.isBlue;
-import static org.firstinspires.ftc.teamcode.SetDrivingStyle.startAudienceSide;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -58,8 +57,6 @@ import java.util.ArrayList;
 @Autonomous(name="Backdrop Side Auto")
 @Config
 public class BackdropSideAuto extends CommandbasedOpmode {
-
-    boolean actingAsBlue;
 
     SampleMecanumDrive drive;
 
@@ -104,11 +101,9 @@ public class BackdropSideAuto extends CommandbasedOpmode {
     public void init() {
         robot.init(hardwareMap, false);
 
-        actingAsBlue = isBlue ^ startAudienceSide;
-
         double CPURPLEDEPOSITX = STARTX;
 
-        if (actingAsBlue) {
+        if (isBlue) {
             STARTY *= -1;
             STARTTHETA -= REVERSE;
             CPURPLEDEPOSITY *= -1;
@@ -135,7 +130,7 @@ public class BackdropSideAuto extends CommandbasedOpmode {
         Vector2d preParkPose = new Vector2d(DEPOSITX-4, (DEPOSITY+PARKY)/2);
         Vector2d parkPose = new Vector2d(PARKX, PARKY);
 
-        double LFirstXPos = actingAsBlue ? STARTX*0.7+(LRPURPLEDEPOSITX-LRPURPLEDEPOSITXOFFSET)*0.3 : STARTX;
+        double LFirstXPos = isBlue ? STARTX*0.7+(LRPURPLEDEPOSITX-LRPURPLEDEPOSITXOFFSET)*0.3 : STARTX;
 
         startLTraj = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(true)
@@ -162,7 +157,7 @@ public class BackdropSideAuto extends CommandbasedOpmode {
                 .splineToSplineHeading(preDepositPose, PREDEPOSITTHETA+REVERSE)
                 .build();
 
-        if (actingAsBlue) {
+        if (isBlue) {
             startRTraj = drive.trajectorySequenceBuilder(startPose)
                     .setReversed(true)
                     .lineToConstantHeading(new Vector2d(STARTX, LRPURPLEDEPOSITY-LRPURPLEDEPOSITYOFFSET))
@@ -187,7 +182,7 @@ public class BackdropSideAuto extends CommandbasedOpmode {
                     .build();
         }
 
-        if (!startAudienceSide) {
+        if (true) {
             prepDepositTraj = drive.trajectorySequenceBuilder(preDepositPose)
                     .setReversed(true)
                     .addTemporalMarker(0.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
@@ -261,7 +256,7 @@ public class BackdropSideAuto extends CommandbasedOpmode {
                 deposit = new FollowRRTraj(robot.drivetrain, drive, depositCTraj);
                 break;
         }
-        if (!startAudienceSide) {
+        if (true) {
             auto.add(new FollowRRTraj(robot.drivetrain, drive, prepDepositTraj));
             auto.add(deposit);
             auto.add(new FollowRRTraj(robot.drivetrain, drive, parkTraj));

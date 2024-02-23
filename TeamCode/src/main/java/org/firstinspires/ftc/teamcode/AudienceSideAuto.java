@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.SetDrivingStyle.isBlue;
-import static org.firstinspires.ftc.teamcode.SetDrivingStyle.startAudienceSide;
 
 import androidx.annotation.NonNull;
 
@@ -96,6 +95,9 @@ public class AudienceSideAuto extends CommandbasedOpmode {
     public static double TRAVERSEENDX = 48; // TODO
     public static double TRAVERSEY = -12;
 
+    public static double EARLYPARKX = STARTX;
+    public static double EARLYPARKY = STARTY;
+
     public static double DEPOSITX = 52.5;
     public static double DEPOSITY = -34.5;
     public static double DEPOSITYDELTA = -6;
@@ -118,6 +120,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
             TRAVERSEY *= -1;
             DEPOSITY *= -1;
             PARKY *= -1;
+            EARLYPARKY *= -1;
         }
 
         startHeading = robot.drivetrain.getHeading();
@@ -162,69 +165,77 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                 .lineTo(new Vector2d(PIXELINTAKEX, PIXELINTAKEY))
                 .build();
 
-        intakeTraj = drive.trajectorySequenceBuilder(new Pose2d(PIXELINTAKEX, PIXELINTAKEY, REVERSE))
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer));
-                    robot.intake.lowerDropdown(4);
-                })
-                .lineTo(new Vector2d(PIXELINTAKEX-1, PIXELINTAKEY))
-                .waitSeconds(1.5)
-                .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.raiseDropdown())
-                .lineTo(new Vector2d(PIXELINTAKEX-3, PIXELINTAKEY))
-                .waitSeconds(1.0)
-                .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.hold())
-                .lineTo(new Vector2d(PIXELINTAKEX, PIXELINTAKEY))
-                .build();
+        if (!SetDrivingStyle.shortAuto) {
 
-        traverseTraj = drive.trajectorySequenceBuilder(new Pose2d(PIXELINTAKEX, PIXELINTAKEY, REVERSE))
-                .setVelConstraint(new TrajectoryVelocityConstraint() {
-                    public double get(double v, Pose2d pose2d, Pose2d pose2d1, Pose2d pose2d2) {
-                        return 35;
-                    }
-                })
-                .addTemporalMarker(3.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
-                .addTemporalMarker(4.0, () -> robot.slides.setTargetPosition(0.0))
-                .addTemporalMarker(4.5, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
-                .splineToConstantHeading(new Vector2d(PIXELINTAKEX, PIXELINTAKEY*0.75+TRAVERSEY*0.25), -CLOCKWISE90)
-                .splineToConstantHeading(new Vector2d(TRAVERSESTARTX, TRAVERSEY), 0)
-                .splineToConstantHeading(new Vector2d(TRAVERSEENDX, TRAVERSEY), 0)
-                .build();
+            intakeTraj = drive.trajectorySequenceBuilder(new Pose2d(PIXELINTAKEX, PIXELINTAKEY, REVERSE))
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                        scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer));
+                        robot.intake.lowerDropdown(4);
+                    })
+                    .lineTo(new Vector2d(PIXELINTAKEX - 1, PIXELINTAKEY))
+                    .waitSeconds(1.5)
+                    .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.raiseDropdown())
+                    .lineTo(new Vector2d(PIXELINTAKEX - 3, PIXELINTAKEY))
+                    .waitSeconds(1.0)
+                    .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.hold())
+                    .lineTo(new Vector2d(PIXELINTAKEX, PIXELINTAKEY))
+                    .build();
 
-        depositLTraj = drive.trajectorySequenceBuilder(new Pose2d(TRAVERSEENDX, TRAVERSEY, REVERSE))
-                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY*0.5+TRAVERSEY*0.5-DEPOSITYDELTA*0.5), CLOCKWISE90)
-                .splineToConstantHeading(new Vector2d(DEPOSITX, DEPOSITY-DEPOSITYDELTA), 0)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
-                .waitSeconds(2)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
-                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY-DEPOSITYDELTA), REVERSE)
-                .splineToConstantHeading(new Vector2d(DEPOSITX-4, PARKY), (Math.abs(PARKY)>36) ? CLOCKWISE90 : -CLOCKWISE90)
-                .lineToConstantHeading(new Vector2d(PARKX, PARKY))
-                .build();
+            traverseTraj = drive.trajectorySequenceBuilder(new Pose2d(PIXELINTAKEX, PIXELINTAKEY, REVERSE))
+                    .setVelConstraint(new TrajectoryVelocityConstraint() {
+                        public double get(double v, Pose2d pose2d, Pose2d pose2d1, Pose2d pose2d2) {
+                            return 35;
+                        }
+                    })
+                    .addTemporalMarker(3.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
+                    .addTemporalMarker(4.0, () -> robot.slides.setTargetPosition(0.0))
+                    .addTemporalMarker(4.5, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
+                    .splineToConstantHeading(new Vector2d(PIXELINTAKEX, PIXELINTAKEY * 0.75 + TRAVERSEY * 0.25), -CLOCKWISE90)
+                    .splineToConstantHeading(new Vector2d(TRAVERSESTARTX, TRAVERSEY), 0)
+                    .splineToConstantHeading(new Vector2d(TRAVERSEENDX, TRAVERSEY), 0)
+                    .build();
 
-        depositCTraj = drive.trajectorySequenceBuilder(new Pose2d(TRAVERSEENDX, TRAVERSEY, REVERSE))
-                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY*0.5+TRAVERSEY*0.5), CLOCKWISE90)
-                .splineToConstantHeading(new Vector2d(DEPOSITX, DEPOSITY), 0)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
-                .waitSeconds(2)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
-                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY), REVERSE)
-                .splineToConstantHeading(new Vector2d(DEPOSITX-4, PARKY), (Math.abs(PARKY)>36) ? CLOCKWISE90 : -CLOCKWISE90)
-                .lineToConstantHeading(new Vector2d(PARKX, PARKY))
-                .build();
+            depositLTraj = drive.trajectorySequenceBuilder(new Pose2d(TRAVERSEENDX, TRAVERSEY, REVERSE))
+                    .splineToConstantHeading(new Vector2d(DEPOSITX - 4, DEPOSITY * 0.5 + TRAVERSEY * 0.5 - DEPOSITYDELTA * 0.5), CLOCKWISE90)
+                    .splineToConstantHeading(new Vector2d(DEPOSITX, DEPOSITY - DEPOSITYDELTA), 0)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
+                    .waitSeconds(2)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                    .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                    .splineToConstantHeading(new Vector2d(DEPOSITX - 4, DEPOSITY - DEPOSITYDELTA), REVERSE)
+                    .splineToConstantHeading(new Vector2d(DEPOSITX - 4, PARKY), (Math.abs(PARKY) > 36) ? CLOCKWISE90 : -CLOCKWISE90)
+                    .lineToConstantHeading(new Vector2d(PARKX, PARKY))
+                    .build();
 
-        depositRTraj = drive.trajectorySequenceBuilder(new Pose2d(TRAVERSEENDX, TRAVERSEY, REVERSE))
-                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY*0.5+TRAVERSEY*0.5+DEPOSITYDELTA*0.5), CLOCKWISE90)
-                .splineToConstantHeading(new Vector2d(DEPOSITX, DEPOSITY+DEPOSITYDELTA), 0)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
-                .waitSeconds(2)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
-                .splineToConstantHeading(new Vector2d(DEPOSITX-4, DEPOSITY+DEPOSITYDELTA), REVERSE)
-                .splineToConstantHeading(new Vector2d(DEPOSITX-4, PARKY), (Math.abs(PARKY)>36) ? CLOCKWISE90 : -CLOCKWISE90)
-                .lineToConstantHeading(new Vector2d(PARKX, PARKY))
-                .build();
+            depositCTraj = drive.trajectorySequenceBuilder(new Pose2d(TRAVERSEENDX, TRAVERSEY, REVERSE))
+                    .splineToConstantHeading(new Vector2d(DEPOSITX - 4, DEPOSITY * 0.5 + TRAVERSEY * 0.5), CLOCKWISE90)
+                    .splineToConstantHeading(new Vector2d(DEPOSITX, DEPOSITY), 0)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
+                    .waitSeconds(2)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                    .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                    .splineToConstantHeading(new Vector2d(DEPOSITX - 4, DEPOSITY), REVERSE)
+                    .splineToConstantHeading(new Vector2d(DEPOSITX - 4, PARKY), (Math.abs(PARKY) > 36) ? CLOCKWISE90 : -CLOCKWISE90)
+                    .lineToConstantHeading(new Vector2d(PARKX, PARKY))
+                    .build();
+
+            depositRTraj = drive.trajectorySequenceBuilder(new Pose2d(TRAVERSEENDX, TRAVERSEY, REVERSE))
+                    .splineToConstantHeading(new Vector2d(DEPOSITX - 4, DEPOSITY * 0.5 + TRAVERSEY * 0.5 + DEPOSITYDELTA * 0.5), CLOCKWISE90)
+                    .splineToConstantHeading(new Vector2d(DEPOSITX, DEPOSITY + DEPOSITYDELTA), 0)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> scheduler.schedule(new DriverAssistedAutoTargetedDeposit(robot.arm, robot.wrist, timer)))
+                    .waitSeconds(2)
+                    .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.slides.setTargetPosition(0.3))
+                    .UNSTABLE_addTemporalMarkerOffset(1, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.0, timer, robot.intake)))
+                    .splineToConstantHeading(new Vector2d(DEPOSITX - 4, DEPOSITY + DEPOSITYDELTA), REVERSE)
+                    .splineToConstantHeading(new Vector2d(DEPOSITX - 4, PARKY), (Math.abs(PARKY) > 36) ? CLOCKWISE90 : -CLOCKWISE90)
+                    .lineToConstantHeading(new Vector2d(PARKX, PARKY))
+                    .build();
+        } else {
+            intakeTraj = drive.trajectorySequenceBuilder(new Pose2d(PIXELINTAKEX, PIXELINTAKEY, REVERSE))
+                    .lineToConstantHeading(new Vector2d(PIXELINTAKEX, EARLYPARKY))
+                    .lineToConstantHeading(new Vector2d(EARLYPARKX, EARLYPARKY))
+                    .build();
+        }
     }
 
     /*
@@ -266,8 +277,10 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                 break;
         }
         auto.add(new FollowRRTraj(robot.drivetrain, drive, intakeTraj));
-        auto.add(new FollowRRTraj(robot.drivetrain, drive, traverseTraj));
-        auto.add(new FollowRRTraj(robot.drivetrain, drive, depositTraj));
+        if (!SetDrivingStyle.shortAuto) {
+            auto.add(new FollowRRTraj(robot.drivetrain, drive, traverseTraj));
+            auto.add(new FollowRRTraj(robot.drivetrain, drive, depositTraj));
+        }
         scheduler.schedule(false, new SequentialCommandGroup(auto.toArray(new Command[0])));
     }
 
