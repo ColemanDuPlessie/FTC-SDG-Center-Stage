@@ -163,8 +163,8 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.purplePixel.activate())
                 .waitSeconds(0.75)
                 .setReversed(false)
-                .lineTo(new Vector2d(PIXELINTAKEX-1.5, LRPURPLEDEPOSITY))
-                .lineTo(new Vector2d(PIXELINTAKEX-1.5, PIXELINTAKEY))
+                .lineTo(new Vector2d(PIXELINTAKEX-0.5, LRPURPLEDEPOSITY))
+                .lineTo(new Vector2d(PIXELINTAKEX-0.5, PIXELINTAKEY))
                 .lineTo(new Vector2d(PIXELINTAKEX, PIXELINTAKEY))
                 .build();
 
@@ -181,7 +181,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                     .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.raiseDropdown())
                     .lineTo(new Vector2d(PIXELINTAKEX - 3, PIXELINTAKEY))
                     .waitSeconds(1.0)
-                    .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.hold())
+                    .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.setSpeed(0.25))
                     .lineTo(new Vector2d(PIXELINTAKEX, PIXELINTAKEY))
                     .build();
 
@@ -191,6 +191,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                             return 35;
                         }
                     })
+                    .addTemporalMarker(2.0, () -> robot.intake.hold())
                     .addTemporalMarker(3.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
                     .addTemporalMarker(4.0, () -> robot.slides.setTargetPosition(0.0))
                     .addTemporalMarker(4.5, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))

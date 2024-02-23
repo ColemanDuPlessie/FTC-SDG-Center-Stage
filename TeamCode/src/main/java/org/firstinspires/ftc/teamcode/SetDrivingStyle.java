@@ -82,7 +82,7 @@ public class SetDrivingStyle extends CommandbasedOpmode {
         memorizedSlidePosition = rToggle.get();
         autoParkCenter = lToggle.get();
         if (!pad1.getDpadDown() && dpadDownWasDown) {
-            autoSecondsDelay = Math.min(autoSecondsDelay-1, 0);
+            autoSecondsDelay = Math.max(autoSecondsDelay-1, 0);
         } else if (!pad1.getDpadUp() && dpadUpWasDown) {
             autoSecondsDelay += 1;
         }
