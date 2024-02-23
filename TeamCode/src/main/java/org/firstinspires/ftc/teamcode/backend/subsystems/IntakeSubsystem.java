@@ -16,9 +16,9 @@ public class IntakeSubsystem extends SubsystemBase {
     public ServoImpl leftDropdownServo;
     public ServoImpl rightDropdownServo;
 
-    public static double dropdownUpPos = 0.98;
-    public static double dropdownLeftPosOffset = 0.27;
-    public static double dropdownDownPos = 0.59;
+    public static double dropdownUpPos = 0.95;
+    public static double dropdownLeftPosOffset = 0.2575;
+    public static double dropdownDownPos = 0.57;
     public static double dropdownPosDelta = 0.033;
 
     public static double power = 0.75;
