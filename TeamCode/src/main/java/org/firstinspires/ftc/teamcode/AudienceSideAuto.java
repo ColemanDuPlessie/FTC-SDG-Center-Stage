@@ -88,7 +88,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
     public static double STARTY = -63;
     public static double STARTTHETA = CLOCKWISE90;
     public static double LRPURPLEDEPOSITX = -43.5;
-    public static double LRPURPLEDEPOSITXOFFSET = 11.5; // This is correct for Red R, Blue L, and must be negated for Red L, Blue R
+    public static double LRPURPLEDEPOSITXOFFSET = 10.5; // This is correct for Red R, Blue L, and must be negated for Red L, Blue R
     public static double LRPURPLEDEPOSITY = -36;
     public static double LRPURPLEDEPOSITTHETA = REVERSE;
     public static double CPURPLEDEPOSITY = -24.5;
@@ -102,7 +102,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
     public static double EARLYPARKY = STARTY;
 
     public static double DEPOSITX = 52.5;
-    public static double DEPOSITY = -34.5;
+    public static double DEPOSITY = -36;
     public static double DEPOSITYDELTA = -6;
     public static double PARKX = 63;
     public static double PARKY = SetDrivingStyle.autoParkCenter ? -12 : -60;
@@ -181,20 +181,19 @@ public class AudienceSideAuto extends CommandbasedOpmode {
                     .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.raiseDropdown())
                     .lineTo(new Vector2d(PIXELINTAKEX - 3, PIXELINTAKEY))
                     .waitSeconds(1.0)
-                    .UNSTABLE_addTemporalMarkerOffset(0.0, () -> robot.intake.setSpeed(0.25))
+                    .UNSTABLE_addTemporalMarkerOffset(0.0, () -> {
+                        robot.intake.hold();
+                        robot.arm.toggle();
+                        robot.wrist.toggle();
+                    })
                     .lineTo(new Vector2d(PIXELINTAKEX, PIXELINTAKEY))
                     .build();
 
             traverseTraj = drive.trajectorySequenceBuilder(new Pose2d(PIXELINTAKEX, PIXELINTAKEY, REVERSE))
-                    .setVelConstraint(new TrajectoryVelocityConstraint() {
-                        public double get(double v, Pose2d pose2d, Pose2d pose2d1, Pose2d pose2d2) {
-                            return 35;
-                        }
-                    })
-                    .addTemporalMarker(2.0, () -> robot.intake.hold())
-                    .addTemporalMarker(3.0, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
-                    .addTemporalMarker(4.0, () -> robot.slides.setTargetPosition(0.0))
-                    .addTemporalMarker(4.5, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
+                    .setVelConstraint((v, pose2d, pose2d1, pose2d2) -> 35)
+                    .addTemporalMarker(4.5, () -> scheduler.schedule(new ArmAwareSetSlides(robot.slides, robot.arm, robot.wrist, 0.3, timer)))
+                    .addTemporalMarker(5.5, () -> robot.slides.setTargetPosition(0.0))
+                    .addTemporalMarker(6.0, () -> scheduler.schedule(new ReadyArmCarefully(robot.arm, robot.wrist, timer)))
                     .splineToConstantHeading(new Vector2d(PIXELINTAKEX, PIXELINTAKEY * 0.75 + TRAVERSEY * 0.25), -CLOCKWISE90)
                     .splineToConstantHeading(new Vector2d(TRAVERSESTARTX, TRAVERSEY), 0)
                     .splineToConstantHeading(new Vector2d(TRAVERSEENDX, TRAVERSEY), 0)
