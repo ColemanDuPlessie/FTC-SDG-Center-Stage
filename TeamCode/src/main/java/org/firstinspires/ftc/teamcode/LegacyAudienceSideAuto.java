@@ -51,7 +51,7 @@ import java.util.ArrayList;
  * I should probably document this...
  */
 
-@Autonomous(name="Legacy Audience Side Auto (1+0)")
+@Autonomous(name="Legacy Audience Side Auto (1+0) (DO NOT USE)")
 @Config
 public class LegacyAudienceSideAuto extends CommandbasedOpmode {
 

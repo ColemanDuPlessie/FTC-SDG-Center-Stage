@@ -54,7 +54,7 @@ import java.util.ArrayList;
  * I should probably document this...
  */
 
-@Autonomous(name="Legacy Auto (2+0)")
+@Autonomous(name="Legacy Auto (2+0) (DO NOT USE)")
 @Config
 public class LegacyBackdropSideAuto extends CommandbasedOpmode {
 

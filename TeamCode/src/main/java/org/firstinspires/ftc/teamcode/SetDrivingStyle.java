@@ -56,6 +56,10 @@ public class SetDrivingStyle extends CommandbasedOpmode {
     public static boolean isBlue                 = false;
     public static boolean memorizedSlidePosition = false;
     public static boolean autoParkCenter = false;
+    public static int autoSecondsDelay = 0;
+
+    private boolean dpadDownWasDown = false;
+    private boolean dpadUpWasDown = false;
 
     @Override
     public void init() {
@@ -77,6 +81,13 @@ public class SetDrivingStyle extends CommandbasedOpmode {
         isBlue                 = yToggle.get();
         memorizedSlidePosition = rToggle.get();
         autoParkCenter = lToggle.get();
+        if (!pad1.getDpadDown() && dpadDownWasDown) {
+            autoSecondsDelay = Math.min(autoSecondsDelay-1, 0);
+        } else if (!pad1.getDpadUp() && dpadUpWasDown) {
+            autoSecondsDelay += 1;
+        }
+        dpadDownWasDown = pad1.getDpadDown();
+        dpadUpWasDown = pad1.getDpadUp();
 
         telemetry.addData("Depositing automatically lowers slides?: (toggle with a)", depositAutoRetract);
         telemetry.addData("Auto type: (toggle with b)", shortAuto ? "No cycles (worse)" : "Cycles (longer)");
@@ -84,6 +95,7 @@ public class SetDrivingStyle extends CommandbasedOpmode {
         telemetry.addData("We are on the (toggle with y)", isBlue ? "Blue Alliance" : "Red Alliance");
         telemetry.addData("Slide height is (toggle with r bumper)", memorizedSlidePosition ? "Memorized & Adjustable (WIP)" : "Setpoints");
         telemetry.addData("Auto parks closer to (toggle with l bumper)", autoParkCenter ? "Center of Field" : "Edges of Field");
+        telemetry.addData("Auto start delay (seconds) (adjust with dpad up/down)", autoSecondsDelay);
     }
 
     @Override

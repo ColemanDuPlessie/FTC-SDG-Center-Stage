@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.SetDrivingStyle.autoSecondsDelay;
 import static org.firstinspires.ftc.teamcode.SetDrivingStyle.isBlue;
 
 import androidx.annotation.NonNull;
@@ -40,6 +41,7 @@ import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAcceleration
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.apache.commons.math3.util.MathUtils;
@@ -261,6 +263,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
         }
         TrajectorySequence depositTraj;
         ArrayList<Command> auto = new ArrayList<>();
+        if (SetDrivingStyle.autoSecondsDelay != 0) {auto.add(new WaitCommand(autoSecondsDelay*1000));}
         switch (robot.camera.getPropPosition()) {
             case LEFT:
                 auto.add(new FollowRRTraj(robot.drivetrain, drive, startLTraj));

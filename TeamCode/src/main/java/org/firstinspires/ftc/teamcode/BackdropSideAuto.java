@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.SetDrivingStyle.autoSecondsDelay;
 import static org.firstinspires.ftc.teamcode.SetDrivingStyle.isBlue;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -36,6 +37,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.apache.commons.math3.util.MathUtils;
@@ -240,6 +242,7 @@ public class BackdropSideAuto extends CommandbasedOpmode {
     public void start() {
         robot.camera.propDetected();
         ArrayList<Command> auto = new ArrayList<>();
+        if (SetDrivingStyle.autoSecondsDelay != 0) {auto.add(new WaitCommand(autoSecondsDelay*1000));}
         FollowRRTraj deposit;
         switch (robot.camera.getPropPosition()) {
             case LEFT:
