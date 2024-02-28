@@ -73,7 +73,7 @@ public class Teleop extends CommandbasedOpmode {
     }
 
     private void toggleDropdown() {
-        if (robot.intake.getCurrentDropdownPos() == IntakeSubsystem.dropdownUpPos) {
+        if (Math.abs(robot.intake.getCurrentDropdownPos() - IntakeSubsystem.dropdownUpPos) <= 0.05) {
             robot.intake.lowerDropdown(dropdownSetpoint);
         } else {
             robot.intake.raiseDropdown();
