@@ -84,7 +84,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
     private static final double REVERSE = Math.toRadians(180);
     private static double CLOCKWISE90 = Math.toRadians(-90);
 
-    public static double STARTX = -36;
+    public static double STARTX = -37;
     public static double STARTY = -63;
     public static double STARTTHETA = CLOCKWISE90;
     public static double LRPURPLEDEPOSITX = -43.5;
@@ -92,7 +92,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
     public static double LRPURPLEDEPOSITY = -36;
     public static double LRPURPLEDEPOSITTHETA = REVERSE;
     public static double CPURPLEDEPOSITY = -24.5;
-    public static double PIXELINTAKEX = -58;
+    public static double PIXELINTAKEX = -57;
     public static double PIXELINTAKEY = -24;
     public static double TRAVERSESTARTX = -56;
     public static double TRAVERSEENDX = 48; // TODO
@@ -116,7 +116,6 @@ public class AudienceSideAuto extends CommandbasedOpmode {
         if (isBlue) {
             CLOCKWISE90 *= -1;
             STARTY *= -1;
-            STARTX -= 1; // TODO?
             STARTTHETA -= REVERSE;
             CPURPLEDEPOSITY *= -1;
             LRPURPLEDEPOSITY *= -1;
@@ -125,6 +124,8 @@ public class AudienceSideAuto extends CommandbasedOpmode {
             DEPOSITY *= -1;
             PARKY *= -1;
             EARLYPARKY *= -1;
+        } else {
+            DEPOSITY -= 2;
         }
 
         startHeading = robot.drivetrain.getHeading();
@@ -173,7 +174,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
 
             intakeTraj = drive.trajectorySequenceBuilder(new Pose2d(PIXELINTAKEX, PIXELINTAKEY, REVERSE))
                     .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                        scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer));
+                        scheduler.schedule(new EnableIntakeSafe(robot.intake, robot.arm, robot.wrist, timer, 0.50));
                         robot.intake.lowerDropdown(4);
                     })
                     .UNSTABLE_addTemporalMarkerOffset(0.5, () -> new SlowIntakeFromStack(robot.intake, timer))
