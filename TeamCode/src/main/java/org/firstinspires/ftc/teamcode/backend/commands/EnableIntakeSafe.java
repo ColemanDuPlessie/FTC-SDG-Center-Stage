@@ -18,6 +18,7 @@ public class EnableIntakeSafe extends CommandBase {
     private IntakeSubsystem intake;
     private ArmSubsystem arm;
     private WristSubsystem wrist;
+    private final double power;
 
     private boolean waitToEnable = true;
     private boolean isReversed = false;
@@ -30,6 +31,18 @@ public class EnableIntakeSafe extends CommandBase {
         addRequirements(a);
         addRequirements(w);
         this.timer = timer;
+        power = IntakeSubsystem.power;
+    }
+
+    public EnableIntakeSafe(IntakeSubsystem i, ArmSubsystem a, WristSubsystem w, ElapsedTime timer, double power) {
+        intake = i;
+        arm = a;
+        wrist = w;
+        addRequirements(i);
+        addRequirements(a);
+        addRequirements(w);
+        this.timer = timer;
+        this.power = power;
     }
 
     public EnableIntakeSafe(IntakeSubsystem i, ArmSubsystem a, WristSubsystem w, ElapsedTime timer, boolean isReversed) {
@@ -41,6 +54,18 @@ public class EnableIntakeSafe extends CommandBase {
         addRequirements(w);
         this.isReversed = isReversed;
         this.timer = timer;
+        power = IntakeSubsystem.power;
+    }
+    public EnableIntakeSafe(IntakeSubsystem i, ArmSubsystem a, WristSubsystem w, ElapsedTime timer, boolean isReversed, double power) {
+        intake = i;
+        arm = a;
+        wrist = w;
+        addRequirements(i);
+        addRequirements(a);
+        addRequirements(w);
+        this.isReversed = isReversed;
+        this.timer = timer;
+        this.power = power;
     }
 
     @Override
@@ -54,9 +79,9 @@ public class EnableIntakeSafe extends CommandBase {
     public void execute() {
         if (waitToEnable && ((long) timer.milliseconds()) - startMillis >= armTravelWaitTime) {
             if (isReversed) {
-                intake.outtake();
+                intake.setSpeed(-power);
             } else {
-                intake.intake();
+                intake.setSpeed(power);
             }
             waitToEnable = false;
         }
