@@ -91,7 +91,7 @@ public class AudienceSideAuto extends CommandbasedOpmode {
     public static double LRPURPLEDEPOSITXOFFSET = 10.5; // This is correct for Red R, Blue L, and must be negated for Red L, Blue R
     public static double LRPURPLEDEPOSITY = -36;
     public static double LRPURPLEDEPOSITTHETA = REVERSE;
-    public static double CPURPLEDEPOSITY = -24.5;
+    public static double CPURPLEDEPOSITY = -25.5;
     public static double PIXELINTAKEX = -57;
     public static double PIXELINTAKEY = -24;
     public static double TRAVERSESTARTX = -56;
@@ -151,8 +151,8 @@ public class AudienceSideAuto extends CommandbasedOpmode {
         startCTraj = drive.trajectorySequenceBuilder(startPose)
                 .setReversed(true)
                 .splineToConstantHeading(new Vector2d(STARTX-4, CPURPLEDEPOSITY*0.2+STARTY*0.8), STARTTHETA+REVERSE)
-                .splineToSplineHeading(new Pose2d(STARTX-4, CPURPLEDEPOSITY*0.7+STARTY*0.3, REVERSE), STARTTHETA+REVERSE)
-                .splineToConstantHeading(new Vector2d(STARTX-4, CPURPLEDEPOSITY), STARTTHETA) // TODO +REVERSE)
+                .splineToSplineHeading(new Pose2d(STARTX-14, CPURPLEDEPOSITY*0.9+STARTY*0.1, REVERSE), STARTTHETA+REVERSE)
+                .splineToConstantHeading(new Vector2d(STARTX-4, CPURPLEDEPOSITY), 0)
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> robot.purplePixel.activate())
                 .setReversed(false)
                 .waitSeconds(0.75)
