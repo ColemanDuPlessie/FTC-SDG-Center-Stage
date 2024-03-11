@@ -131,6 +131,9 @@ public class FastBackdropAuto extends CommandbasedOpmode {
         TrajectoryVelocityConstraint t = (v, a, b, c) -> 45;
         TrajectoryAccelerationConstraint a = (v, b, c, d) -> 40;
 
+        TrajectoryVelocityConstraint tr = (v, a1, b, c) -> 35;
+        TrajectoryAccelerationConstraint ar = (v, b, c, d) -> 25;
+
         startLTraj = drive.trajectorySequenceBuilder(startPose) // This is actually the right trajectory on blue side
                 .setConstraints(t, a)
                 .setReversed(true)
@@ -157,7 +160,7 @@ public class FastBackdropAuto extends CommandbasedOpmode {
                 .build();
 
         startRTraj = drive.trajectorySequenceBuilder(startPose)
-                .setConstraints(t, a)
+                // .setConstraints(tr, ar)
                 .setReversed(true)
                 .splineToConstantHeading(new Vector2d(STARTX+4, LRPURPLEDEPOSITY*0.3+STARTY*0.7), STARTTHETA+REVERSE)
                 .splineToSplineHeading(new Pose2d(LRPURPLEDEPOSITX+LRPURPLEDEPOSITXOFFSET, LRPURPLEDEPOSITY, 0), LRPURPLEDEPOSITTHETA+CLOCKWISE90/2)
